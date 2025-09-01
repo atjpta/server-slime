@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "outDir": "build",
+    "target": "ESNext",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "strict": true,
+    "allowJs": true,
+    "strictNullChecks": false,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "useDefineForClassFields": false,
+    "rootDir": "./",
+    "baseUrl": "./src",
+    "paths": {
+      "~/*": ["*"]
+    },
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "types": ["@types/node"]
+  },
+  "include": ["src"]
+}
