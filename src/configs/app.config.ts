@@ -1,19 +1,22 @@
 import config from '@colyseus/tools'
 import { appRouter, gameServerRouter } from '~/routers'
-import { connectRedis } from './diver.config'
 import { connectMongoDB } from './database.config'
+import { DiverCache } from './diver.config'
 
 export const appConfig = config({
   options: {
-    driver: connectRedis(),
+    driver: DiverCache,
   },
 
   initializeGameServer: (gameServer) => {
     gameServerRouter(gameServer)
+    gameServer.onBeforeShutdown(() => {
+      console.log('onBeforeShutdown')
+    })
   },
 
   initializeExpress: (app) => {
-    app.use(appRouter)
+    appRouter(app)
   },
 
   beforeListen: async () => {

@@ -26,3 +26,5 @@ npm start
 ## License
 
 MIT
+
+ngrok http http://localhost:2567 --url=flamingo-probable-probably.ngrok-free.app

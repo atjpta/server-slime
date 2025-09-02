@@ -1,5 +1,6 @@
-import { RedisDriver } from 'colyseus'
+import { RedisDriver } from '@colyseus/redis-driver'
 
-export const connectRedis = () => {
-  return new RedisDriver()
-}
+const redis = new RedisDriver()
+redis.clear()
+
+export const DiverCache = redis
