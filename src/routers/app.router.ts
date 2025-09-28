@@ -8,6 +8,7 @@ import {
   AuthController,
   DiscordController,
 } from '~/features/users/auth/controllers'
+import { PlayerController } from '~/features/users/players/controllers'
 
 const router = Router()
 
@@ -23,7 +24,12 @@ router.use('/monitor', basicAuthMiddleware, monitor())
 
 export const appRouter = (app: e.Express) => {
   app.use(AuthService.prefix, AuthService.routes())
-  registerControllers(app, [DiscordController, AuthController])
+
+  registerControllers(app, [
+    DiscordController,
+    AuthController,
+    PlayerController,
+  ])
 
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     if (err) {

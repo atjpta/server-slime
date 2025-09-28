@@ -1,4 +1,4 @@
-export enum providerEnum {
+export enum ProviderEnum {
   GITHUB = 'github',
   FACEBOOK = 'facebook',
   DISCORD = 'discord',

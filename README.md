@@ -28,3 +28,29 @@ npm start
 MIT
 
 ngrok http http://localhost:2567 --url=flamingo-probable-probably.ngrok-free.app
+
+- đọc hết docs của coluseus --- ok
+- vào table phayer, khi đăng kí sẽ init player lv 1 cùng các thuộc tính cơ bản mai làm hiển thị ra bên unity --- ok
+- vào phòng global (phòng chung, có thể chát chung, thông báo các kiểu) -- đá client kia nếu đăng nhập trùng
+- vào phòng battle để choảng nhau
+- tương lai thiết kế nhiều server
+
+```
+
+các từ khóa có thể xài
+Timing Events
+Exception Handling in Rooms
+
+
+room ở đây đều riêng cả
+các chức năng nào cần tương tác real time thì mới viết socket, còn lại dùng http hết
+dùng @colyseus/command để tách logic ra khỏi script nhận event (MyRoom.ts) --- tương tự controller và service
+
+public class ExampleManager : ColyseusManager<ExampleManager>
+   public async void GetAvailableRooms()
+    {
+        StarBossRoomAvailable[] rooms = await client.GetAvailableRooms<StarBossRoomAvailable>(_roomController.roomName);
+
+        onRoomsReceived?.Invoke(rooms);
+    }
+```

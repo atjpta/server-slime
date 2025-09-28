@@ -10,7 +10,7 @@ export const authMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.headers.authorization.replace('Bearer', '').trim()
+  const token = req.headers.authorization?.replace('Bearer', '').trim()
   try {
     const jwtPayload = (await JWT.verify(token)) as JwtPayload
     const providerId = jwtPayload.providerId
@@ -23,12 +23,12 @@ export const authMiddleware = async (
     }
     req['user'] = record
     return next()
-  } catch (error) {
+  } catch (error: any) {
     return ResponseHelper.unauthorized(
       { res, req },
       {
         code: ApiErrorCodeEnum.UNAUTHORIZED,
-        error,
+        error: error.message,
       }
     )
   }

@@ -1,12 +1,12 @@
 import e, { RequestHandler, Router } from 'express'
 import { DIContainer } from './container'
-import { httpMethodEnum } from '~/shared/enums'
+import { HttpMethodEnum } from '~/shared/enums'
 import { asyncWrapper } from './async-wrapper'
 
 interface ControllerInstance {
   prefix?: string
   routes?: {
-    method: httpMethodEnum
+    method: HttpMethodEnum
     path: string
     middlewares?: RequestHandler[]
     handlerName: string

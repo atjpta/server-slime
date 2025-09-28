@@ -7,7 +7,7 @@ import { Controller } from '~/core/decorators'
 export class DiscordController {
   constructor(private discordService: DiscordService) {}
 
-  //   @Route(httpMethodEnum.POST, '/discord_token')
+  //   @Route(HttpMethodEnum.POST, '/discord_token')
   //   login = async (req: IRequest, res: Response) => {
   //     const accessToken = await this.discordService.retrieveAccessToken(
   //       req.body.code

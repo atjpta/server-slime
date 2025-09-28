@@ -2,10 +2,14 @@ import config from '@colyseus/tools'
 import { appRouter, gameServerRouter } from '~/routers'
 import { connectMongoDB } from './database.config'
 import { DiverCache } from './diver.config'
+import { RedisPresence } from '@colyseus/redis-presence'
+import { env } from './env.config'
 
 export const appConfig = config({
   options: {
     driver: DiverCache,
+    presence: new RedisPresence(env.REDIS_URI),
+    devMode: true,
   },
 
   initializeGameServer: (gameServer) => {

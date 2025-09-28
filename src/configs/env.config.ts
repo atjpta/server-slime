@@ -4,6 +4,7 @@ export const env = {
   BACKEND_URL: process.env.BACKEND_URL,
 
   MONGO_URI: process.env.MONGO_URI,
+  REDIS_URI: process.env.REDIS_URI,
 
   RESEND_API_KEY: process.env.RESEND_API_KEY,
 

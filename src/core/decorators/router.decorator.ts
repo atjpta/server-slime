@@ -1,8 +1,8 @@
 import { RequestHandler } from 'express'
-import { httpMethodEnum } from '~/shared/enums'
+import { HttpMethodEnum } from '~/shared/enums'
 
 export function Route(
-  method: httpMethodEnum,
+  method: HttpMethodEnum,
   path: string,
   ...middlewares: RequestHandler[]
 ) {

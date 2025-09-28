@@ -2,7 +2,11 @@ import { auth, JWT } from '@colyseus/auth'
 import { DateTime } from 'luxon'
 import { env, resend } from '~/configs'
 import { UserModel } from '~/features/users/auth/models'
-import { providerEnum, userStatusEnum } from '~/shared/enums'
+import { ProviderEnum, UserStatusEnum } from '~/shared/enums'
+import { PlayerModel } from '../../players/models'
+import mongoose from 'mongoose'
+import { SpeciesModel } from '../../species/models'
+import { LevelModel } from '../../levels/models'
 
 auth.backend_url = env.BACKEND_URL
 // auth.prefix = '/auth'
@@ -39,17 +43,29 @@ auth.settings.onRegisterWithEmailAndPassword = async (
   options
 ) => {
   const username = options.name || email.split('@')[0]
-  const record = await UserModel.create({
+  const user = await UserModel.create({
     username,
     email,
     password,
-    provider: providerEnum.EMAIL,
+    provider: ProviderEnum.EMAIL,
     providerId: email,
-    status: userStatusEnum.ACTIVE,
+    status: UserStatusEnum.ACTIVE,
     lastLogin: DateTime.now(),
     verified: false,
   })
-  return record.toJSON()
+  const playerId = new mongoose.Types.ObjectId()
+  const species = await SpeciesModel.findOne()
+  const level = await LevelModel.findOne({ level: 1 })
+
+  await PlayerModel.create({
+    name: 'player_' + playerId,
+    _id: playerId,
+    species: species.id,
+    user: user.id,
+    level: level.id,
+  })
+
+  return user.toJSON()
 }
 
 auth.settings.onForgotPassword = async function (
@@ -89,26 +105,26 @@ auth.settings.onEmailConfirmed = async function (email) {
   return true
 }
 
-auth.oauth.addProvider(providerEnum.GOOGLE, {
+auth.oauth.addProvider(ProviderEnum.GOOGLE, {
   key: env.GOOGLE_CLIENT_ID,
   secret: env.GOOGLE_CLIENT_SECRET,
   // scope: ['profile', 'email'],
   scope: ['userinfo.profile', 'email'],
 })
 
-auth.oauth.addProvider(providerEnum.DISCORD, {
+auth.oauth.addProvider(ProviderEnum.DISCORD, {
   key: env.DISCORD_CLIENT_ID,
   secret: env.DISCORD_CLIENT_SECRET,
   scope: ['identify', 'email'],
 })
 
-// auth.oauth.addProvider(providerEnum.FACEBOOK, {
+// auth.oauth.addProvider(ProviderEnum.FACEBOOK, {
 //   key: env.FACEBOOK_CLIENT_ID,
 //   secret: env.FACEBOOK_CLIENT_SECRET,
 //   scope: ['gaming_profile', 'email'],
 // })
 
-auth.oauth.addProvider(providerEnum.GITHUB, {
+auth.oauth.addProvider(ProviderEnum.GITHUB, {
   key: env.GITHUB_CLIENT_ID,
   secret: env.GITHUB_CLIENT_SECRET,
   scope: ['read:user', 'user:email'],
@@ -122,7 +138,7 @@ auth.oauth.onCallback(async (data, provider) => {
     email: profile.email,
     provider: provider,
     providerId: profile.id,
-    status: userStatusEnum.ACTIVE,
+    status: UserStatusEnum.ACTIVE,
     lastLogin: DateTime.now(),
     verified: true,
   }

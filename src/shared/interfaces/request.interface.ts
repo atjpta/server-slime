@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { IUser } from './user.interface'
+import { IUser } from '~/features/users/auth/models'
 
 export interface IRequestAuth {
   providerId: string
