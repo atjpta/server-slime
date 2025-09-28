@@ -29,12 +29,6 @@ MIT
 
 ngrok http http://localhost:2567 --url=flamingo-probable-probably.ngrok-free.app
 
-- đọc hết docs của coluseus --- ok
-- vào table phayer, khi đăng kí sẽ init player lv 1 cùng các thuộc tính cơ bản mai làm hiển thị ra bên unity --- ok
-- vào phòng global (phòng chung, có thể chát chung, thông báo các kiểu) -- đá client kia nếu đăng nhập trùng
-- vào phòng battle để choảng nhau
-- tương lai thiết kế nhiều server
-
 ```
 
 các từ khóa có thể xài
@@ -53,4 +47,23 @@ public class ExampleManager : ColyseusManager<ExampleManager>
 
         onRoomsReceived?.Invoke(rooms);
     }
+
+validate
+
+onCreate () {
+this.onMessage("action", (client, payload) => {
+    //
+    // payload.x and payload.y are guaranteed to be numbers here.
+    //
+    console.log({ x: payload.x, y: payload.y });
+
+}, (payload) => {
+    if (typeof(payload.x) !== "number" || typeof(payload.y) !== "number") {
+        throw new Error("Invalid payload");
+    }
+    return payload;
+});
+}
 ```
+
+- vào phòng battle để choảng nhau

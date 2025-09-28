@@ -9,7 +9,6 @@ export const appConfig = config({
   options: {
     driver: DiverCache,
     presence: new RedisPresence(env.REDIS_URI),
-    devMode: true,
   },
 
   initializeGameServer: (gameServer) => {

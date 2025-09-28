@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "@colyseus/auth": "^0.16.6",
+    "@colyseus/command": "^0.3.2",
     "@colyseus/core": "^0.16.19",
     "@colyseus/monitor": "^0.16.7",
     "@colyseus/playground": "^0.16.4",

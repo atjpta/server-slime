@@ -33,6 +33,13 @@
   resolved "https://registry.yarnpkg.com/@colyseus/clock/-/clock-1.0.0.tgz#8adbe8b01e87b783334d32a019a74fb07eaf5dd7"
   integrity sha512-x1un5rFEgilVAA6ukSG8GFgtpX/hsmL5BtrPdxLx0dbPU7zwpTVXez2qoGza7YYS5QTvVD45gbHyX/KaaEWSZQ==
 
+"@colyseus/command@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@colyseus/command/-/command-0.3.2.tgz#78d5748429d04b2cf0db37cde816f2eee551fa3a"
+  integrity sha512-y275C8y7CMGNzD2oaPGNTUTqC9MNU6uWcaWhoNV3fU+v+i6wvvcvncx+gJnPc34vCVSEoEh/WJilLXKntiQP9A==
+  dependencies:
+    debug "^4.1.1"
+
 "@colyseus/core@^0.16.19", "@colyseus/core@^0.16.4":
   version "0.16.20"
   resolved "https://registry.yarnpkg.com/@colyseus/core/-/core-0.16.20.tgz#0faf23831d8f2eea5d580ae033a9b81b88e59f42"
