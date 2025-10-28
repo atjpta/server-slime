@@ -2,9 +2,16 @@ import { Schema } from 'mongoose'
 import { createModal } from '~/core/models/mongo.model'
 import { DateTime } from 'luxon'
 import { IBaseDocument } from '~/shared/interfaces'
-import { ILevel } from '../../levels/models'
-import { ISpecies } from '../../species/models'
-import { IUser } from '../../auth/models'
+import { PlayerRoleEnum } from '~/shared/enums'
+import { ILevel } from '~/features/users/levels/models'
+import { ISpecies } from '~/features/users/species/models'
+import {
+  IStats,
+  IStatsDetail,
+  StatsDetailSchema,
+  StatsSchema,
+} from '~/features/users/players/models'
+import { IUser } from '~/features/users/auth/models'
 
 export interface IPlayer extends IBaseDocument {
   name: string
@@ -13,6 +20,9 @@ export interface IPlayer extends IBaseDocument {
   user: IUser
   currentExp: number
   lastLogin?: DateTime
+  role: PlayerRoleEnum
+  stats: IStats
+  statsDetail: IStatsDetail
 }
 
 const schema = new Schema<IPlayer>({
@@ -43,6 +53,20 @@ const schema = new Schema<IPlayer>({
   },
   lastLogin: {
     type: Date,
+  },
+  role: {
+    type: String,
+    enum: PlayerRoleEnum,
+    required: true,
+    default: PlayerRoleEnum.PLAYER,
+  },
+  stats: {
+    type: StatsSchema,
+    required: true,
+  },
+  statsDetail: {
+    type: StatsDetailSchema,
+    required: true,
   },
 })
 

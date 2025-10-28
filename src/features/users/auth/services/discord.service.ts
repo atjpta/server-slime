@@ -1,5 +1,5 @@
 export class DiscordService {
-  retrieveAccessToken = async (code: any) => {
+  public async retrieveAccessToken(code: any) {
     const response = await fetch(`https://discord.com/api/oauth2/token`, {
       method: 'POST',
       headers: {
@@ -16,7 +16,7 @@ export class DiscordService {
     return access_token
   }
 
-  retrieveUserData = async (token: string) => {
+  public async retrieveUserData(token: string) {
     const profile = await (
       await fetch(`https://discord.com/api/users/@me`, {
         method: 'GET',

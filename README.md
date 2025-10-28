@@ -66,4 +66,16 @@ this.onMessage("action", (client, payload) => {
 }
 ```
 
+- làm trang admin web để chỉnh / quản lí các thông số
+- trang admin làm phân quyền cho admin luôn, kể cả bảo trì
 - vào phòng battle để choảng nhau
+- thiết kế inventory (inventory - items - inventory_items)
+  items {
+  id name description type isStack max_stack icon
+  }
+  inventories{
+  id user_id capacity name type
+  }
+  inventory_items {
+  id inventory_id quantity position extraData
+  }

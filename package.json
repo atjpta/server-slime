@@ -16,8 +16,7 @@
     "clean": "rimraf build",
     "schema-codegen": "schema-codegen src/rooms/schema/* --csharp --output ../Assets/Colyseus/Runtime/Example/Scripts/States/",
     "test": "mocha -r tsx test/**_test.ts --exit --timeout 15000",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
+    "lint": "eslint . --ext .ts --fix",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"

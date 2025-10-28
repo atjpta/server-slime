@@ -7,9 +7,12 @@ import { PlayerModel } from '../../players/models'
 import mongoose from 'mongoose'
 import { SpeciesModel } from '../../species/models'
 import { LevelModel } from '../../levels/models'
+import { StatsService } from '~/features/users/players/services/stats.service'
 
 auth.backend_url = env.BACKEND_URL
 // auth.prefix = '/auth'
+
+const statsService = new StatsService()
 
 auth.settings.onGenerateToken = async (userdata: any) => {
   return JWT.sign(
@@ -56,13 +59,15 @@ auth.settings.onRegisterWithEmailAndPassword = async (
   const playerId = new mongoose.Types.ObjectId()
   const species = await SpeciesModel.findOne()
   const level = await LevelModel.findOne({ level: 1 })
-
+  const { statsDetailInit, statsInit } = statsService.getStatsInit()
   await PlayerModel.create({
     name: 'player_' + playerId,
     _id: playerId,
     species: species.id,
     user: user.id,
     level: level.id,
+    stats: statsInit,
+    statsDetail: statsDetailInit,
   })
 
   return user.toJSON()
