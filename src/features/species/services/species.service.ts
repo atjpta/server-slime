@@ -1,5 +1,5 @@
 import { logger } from '@colyseus/core'
-import { SpeciesModel } from '../models'
+import { SpeciesModel } from '~/features/species/models'
 import { RarityEnum } from '~/shared/enums/rarity.enum'
 
 export class SpeciesService {

@@ -1,4 +1,4 @@
-import { IStats, IStatsDetail } from '~/features/users/players/models'
+import { IStats, IStatsDetail } from '~/features/players/models'
 
 export class StatsService {
   public getStatsInit() {

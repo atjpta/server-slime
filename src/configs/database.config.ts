@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import { env } from './env.config'
-import { LevelService } from '~/features/users/levels/services'
-import { SpeciesService } from '~/features/users/species/services'
+import { LevelService } from '~/features/levels/services'
+import { SpeciesService } from '~/features/species/services'
 
 export const connectMongoDB = async () => {
   const mongoUri = env.MONGO_URI

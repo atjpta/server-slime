@@ -3,14 +3,14 @@ import { createModal } from '~/core/models/mongo.model'
 import { DateTime } from 'luxon'
 import { IBaseDocument } from '~/shared/interfaces'
 import { PlayerRoleEnum } from '~/shared/enums'
-import { ILevel } from '~/features/users/levels/models'
-import { ISpecies } from '~/features/users/species/models'
+import { ILevel } from '~/features/levels/models'
+import { ISpecies } from '~/features/species/models'
 import {
   IStats,
   IStatsDetail,
   StatsDetailSchema,
   StatsSchema,
-} from '~/features/users/players/models'
+} from '~/features/players/models'
 import { IUser } from '~/features/users/auth/models'
 
 export interface IPlayer extends IBaseDocument {
@@ -44,7 +44,7 @@ const schema = new Schema<IPlayer>({
   user: {
     type: Schema.Types.ObjectId,
     ref: 'users',
-    required: true,
+    required: false,
   },
   currentExp: {
     type: Number,

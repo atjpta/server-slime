@@ -3,8 +3,8 @@ import { HttpMethodEnum } from '~/shared/enums'
 import { Response } from 'express'
 import { IRequest } from '~/shared/interfaces/request.interface'
 import ResponseHelper from '~/core/helpers/response.helper'
-import { authMiddleware } from '../../auth/middlewares'
-import { PlayerModel } from '../models'
+import { authMiddleware } from '~/features/users/auth/middlewares'
+import { PlayerModel } from '~/features/players/models'
 
 @Controller('/api/players')
 export class PlayerController {

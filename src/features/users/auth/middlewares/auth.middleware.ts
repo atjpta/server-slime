@@ -1,7 +1,7 @@
 import { JWT, JwtPayload } from '@colyseus/auth'
 import { NextFunction, Response } from 'express'
-import { UserModel } from '../models'
 import ResponseHelper from '~/core/helpers/response.helper'
+import { UserModel } from '~/features/users/auth/models'
 import { ApiErrorCodeEnum } from '~/shared/enums'
 import { IRequest } from '~/shared/interfaces'
 

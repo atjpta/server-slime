@@ -1,5 +1,5 @@
 import { logger } from '@colyseus/core'
-import { LevelModel } from '../models'
+import { LevelModel } from '~/features/levels/models'
 
 export class LevelService {
   static async initDB() {

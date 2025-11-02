@@ -8,7 +8,7 @@ import {
   AuthController,
   DiscordController,
 } from '~/features/users/auth/controllers'
-import { PlayerController } from '~/features/users/players/controllers'
+import { PlayerController } from '~/features/players/controllers'
 
 const router = Router()
 
