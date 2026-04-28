@@ -1,6 +1,6 @@
 import { createMiddleware } from "colyseus";
 import { Response } from "@/utils/response.util.js";
-import { authService } from "@/services/auth.service.js";
+import { authService } from "@/modules/auth/services/auth.service.js";
 
 export const authMiddleware = createMiddleware({ requireHeaders: true }, async (ctx) => {
     const authHeader = ctx.getHeader("authorization");

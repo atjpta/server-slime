@@ -1,17 +1,28 @@
 import { listen } from "@colyseus/tools";
 import { connectMongoDB } from "@/configs/mongo.config.js";
-import { defineServer } from "colyseus";
+import { createEndpoint, createRouter, defineServer, monitor, playground } from "colyseus";
 import { uWebSocketsTransport } from "@colyseus/uwebsockets-transport";
 import { rooms } from "@/rooms/index.js";
-import { applyExpressRoutes, routes } from "@/routers/index.js";
+import { authRoutes } from "@/modules/auth/routes/auth.router.js";
+import { env } from "@/configs/env.config.js";
 
 await connectMongoDB();
 
 listen(
     defineServer({
         rooms,
-        routes,
-        express: applyExpressRoutes,
+        express: (app) => {
+            app.use("/monitor", monitor());
+            if (env.NODE_ENV !== "production") {
+                app.use("/", playground());
+            }
+        },
+        routes: createRouter({
+            health: createEndpoint("/health", { method: "GET" }, async (_ctx) => {
+                return { message: "OK" };
+            }),
+            ...authRoutes,
+        }),
         transport: new uWebSocketsTransport({}, {}),
     })
 );

@@ -1,7 +1,7 @@
 import { createEndpoint } from "colyseus";
-import { authService } from "@/services/auth.service.js";
-import { RegisterSchema, LoginSchema } from "@/validators/auth.validator.js";
-import { authMiddleware } from "@/middlewares/auth.middleware.js";
+import { authService } from "@/modules/auth/services/auth.service.js";
+import { RegisterSchema, LoginSchema } from "@/modules/auth/validators/auth.validator.js";
+import { authMiddleware } from "@/modules/auth/middlewares/auth.middleware.js";
 import { Response, RouterContainer } from "@/utils/response.util.js";
 
 const prefix = "/auth";

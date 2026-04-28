@@ -1,4 +1,4 @@
-import { UserStatus } from "@/enums/user.enum.js";
+import { UserStatus } from "@/modules/auth/enums/user.enum.js";
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
