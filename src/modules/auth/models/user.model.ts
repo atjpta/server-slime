@@ -12,7 +12,7 @@ export interface IUser extends Document {
 const UserSchema = new Schema<IUser>({
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true },
-    status: { type: String, enum: Object.values(UserStatus), default: UserStatus.Active },
+    status: { type: String, enum: Object.values(UserStatus), default: UserStatus.ACTIVE },
 });
 
 export const UserModel = mongoose.model<IUser>("User", UserSchema);

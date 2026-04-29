@@ -6,8 +6,8 @@ import { Types } from "mongoose";
 
 export class AuthService {
     async register(email: string, password: string) {
-        const exists = await UserModel.findOne({ email }).lean();
-        if (exists) {
+        const exist = await UserModel.findOne({ email }).lean();
+        if (exist) {
             return;
         }
 

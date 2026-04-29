@@ -4,6 +4,7 @@ import { createEndpoint, createRouter, defineServer, monitor, playground } from 
 import { uWebSocketsTransport } from "@colyseus/uwebsockets-transport";
 import { rooms } from "@/rooms/index.js";
 import { authRoutes } from "@/modules/auth/routes/auth.router.js";
+import { playerRoutes } from "@/modules/player/routes/player.router.js";
 import { env } from "@/configs/env.config.js";
 
 await connectMongoDB();
@@ -22,6 +23,7 @@ listen(
                 return { message: "OK" };
             }),
             ...authRoutes,
+            ...playerRoutes,
         }),
         transport: new uWebSocketsTransport({}, {}),
     })

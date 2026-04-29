@@ -14,6 +14,9 @@ export const authRoutes = {
             RouterContainer(ctx, async () => {
                 const { email, password } = ctx.body;
                 const user = await authService.register(email, password);
+                if (!user) {
+                    return Response.badRequest(ctx, { message: "Email is existed" });
+                }
                 return Response.created(ctx, { data: user });
             })
     ),
