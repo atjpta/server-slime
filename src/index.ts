@@ -6,12 +6,14 @@ import { rooms } from "@/rooms/index.js";
 import { authRoutes } from "@/modules/auth/routes/auth.router.js";
 import { playerRoutes } from "@/modules/player/routes/player.router.js";
 import { env } from "@/configs/env.config.js";
+import { redisDriver } from "@/configs/redis.config.js";
 
 await connectMongoDB();
 
 listen(
     defineServer({
         rooms,
+        driver: redisDriver,
         express: (app) => {
             app.use("/monitor", monitor());
             if (env.NODE_ENV !== "production") {

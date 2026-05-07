@@ -17,7 +17,7 @@ export class AuthService {
     }
 
     async login(email: string, password: string) {
-        const user = await UserModel.findOne({ email }).lean();
+        const user = await UserModel.findOne({ email }).select("+password").lean();
         if (!user) {
             return;
         }
@@ -27,18 +27,18 @@ export class AuthService {
             return;
         }
 
-        const token = jwt.sign({ user }, env.JWT_SECRET, {
+        const token = jwt.sign({ userId: user._id }, env.JWT_SECRET, {
             expiresIn: "30d",
         });
         return { token };
     }
 
     async getProfile(userId: Types.ObjectId) {
-        return UserModel.findById(userId).select("-password").lean();
+        return UserModel.findById(userId).lean();
     }
 
     verifyToken(token: string) {
-        return jwt.verify(token, env.JWT_SECRET) as { user: IUser } & JwtPayload;
+        return jwt.verify(token, env.JWT_SECRET) as { userId: Types.ObjectId } & JwtPayload;
     }
 }
 

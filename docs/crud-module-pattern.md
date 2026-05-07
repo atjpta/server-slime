@@ -144,7 +144,7 @@ export const fooService = new FooService();
 ## 5. Router
 
 - `createEndpoint.create({ use: [authMiddleware] })` — factory với auth baked-in, không cần khai báo `use` lặp lại.
-- `ctx.context.user._id` là `Types.ObjectId` từ JWT.
+- `ctx.context.userId` là `Types.ObjectId` từ JWT.
 - Wrap mọi handler trong `RouterContainer` để tự catch lỗi.
 
 ```ts
@@ -152,46 +152,53 @@ export const fooService = new FooService();
 import { createEndpoint } from "colyseus";
 import { authMiddleware } from "@/modules/auth/middlewares/auth.middleware.js";
 import { fooService } from "@/modules/foo/services/foo.service.js";
-import { CreateFooSchema, UpdateFooSchema, FooIdSchema } from "@/modules/foo/validators/foo.validator.js";
+import {
+    CreateFooSchema,
+    UpdateFooSchema,
+    FooIdSchema,
+} from "@/modules/foo/validators/foo.validator.js";
 import { Response, RouterContainer } from "@/utils/response.util.js";
 
 const authEndpoint = createEndpoint.create({ use: [authMiddleware] });
 const fooPrefix = "/foos";
 
 export const fooRoutes = {
-    createFoo: authEndpoint(fooPrefix, { method: "POST", body: CreateFooSchema }, (ctx) =>
+    create: authEndpoint(fooPrefix, { method: "POST", body: CreateFooSchema }, (ctx) =>
         RouterContainer(ctx, async () => {
-            const { user } = ctx.context;
-            const foo = await fooService.create(user._id, ctx.body.name);
+            const { userId } = ctx.context;
+            const foo = await fooService.create(userId, ctx.body.name);
             return Response.created(ctx, { data: foo });
         })
     ),
 
-    getFoos: authEndpoint(fooPrefix, { method: "GET" }, (ctx) =>
+    index: authEndpoint(fooPrefix, { method: "GET" }, (ctx) =>
         RouterContainer(ctx, async () => {
-            return Response.ok({ data: await fooService.getAll(ctx.context.user._id) });
+            return Response.ok({ data: await fooService.getAll(ctx.context.userId) });
         })
     ),
 
-    getFoo: authEndpoint(`${fooPrefix}/:id`, { method: "GET", params: FooIdSchema }, (ctx) =>
+    show: authEndpoint(`${fooPrefix}/:id`, { method: "GET", params: FooIdSchema }, (ctx) =>
         RouterContainer(ctx, async () => {
-            const foo = await fooService.getById(ctx.params.id, ctx.context.user._id);
+            const foo = await fooService.getById(ctx.params.id, ctx.context.userId);
             if (!foo) return Response.notFound(ctx, { message: "Not found" });
             return Response.ok({ data: foo });
         })
     ),
 
-    updateFoo: authEndpoint(`${fooPrefix}/:id`, { method: "PUT", params: FooIdSchema, body: UpdateFooSchema }, (ctx) =>
-        RouterContainer(ctx, async () => {
-            const foo = await fooService.update(ctx.params.id, ctx.context.user._id, ctx.body);
-            if (!foo) return Response.notFound(ctx, { message: "Not found" });
-            return Response.ok({ data: foo });
-        })
+    update: authEndpoint(
+        `${fooPrefix}/:id`,
+        { method: "PUT", params: FooIdSchema, body: UpdateFooSchema },
+        (ctx) =>
+            RouterContainer(ctx, async () => {
+                const foo = await fooService.update(ctx.params.id, ctx.context.userId, ctx.body);
+                if (!foo) return Response.notFound(ctx, { message: "Not found" });
+                return Response.ok({ data: foo });
+            })
     ),
 
-    deleteFoo: authEndpoint(`${fooPrefix}/:id`, { method: "DELETE", params: FooIdSchema }, (ctx) =>
+    delete: authEndpoint(`${fooPrefix}/:id`, { method: "DELETE", params: FooIdSchema }, (ctx) =>
         RouterContainer(ctx, async () => {
-            const foo = await fooService.delete(ctx.params.id, ctx.context.user._id);
+            const foo = await fooService.delete(ctx.params.id, ctx.context.userId);
             if (!foo) return Response.notFound(ctx, { message: "Not found" });
             return Response.ok({ message: "Deleted successfully" });
         })
@@ -216,11 +223,11 @@ routes: createRouter({
 
 ## Response helpers
 
-| Helper | HTTP | Dùng khi |
-|--------|------|----------|
-| `Response.ok({ data })` | 200 | GET / UPDATE thành công |
-| `Response.created(ctx, { data })` | 201 | POST tạo mới |
-| `Response.notFound(ctx)` | 404 | Không tìm thấy document |
-| `Response.badRequest(ctx, { message })` | 400 | Input sai logic |
-| `Response.unauthorized(ctx)` | 401 | Thiếu / sai token |
-| `Response.conflict(ctx)` | 409 | Trùng dữ liệu |
+| Helper                                  | HTTP | Dùng khi                |
+| --------------------------------------- | ---- | ----------------------- |
+| `Response.ok({ data })`                 | 200  | GET / UPDATE thành công |
+| `Response.created(ctx, { data })`       | 201  | POST tạo mới            |
+| `Response.notFound(ctx)`                | 404  | Không tìm thấy document |
+| `Response.badRequest(ctx, { message })` | 400  | Input sai logic         |
+| `Response.unauthorized(ctx)`            | 401  | Thiếu / sai token       |
+| `Response.conflict(ctx)`                | 409  | Trùng dữ liệu           |

@@ -1,5 +1,6 @@
 import { EndpointContext, EndpointOptions } from "colyseus";
 import { APIError } from "@colyseus/better-call";
+import { ZodError } from "zod";
 
 interface IRes {
     data: any;
@@ -146,6 +147,7 @@ export const RouterContainer = async (ctx: Ctx, fn: () => Promise<IRes>): Promis
         return await fn();
     } catch (e) {
         if (e instanceof APIError) throw e;
+        if (e instanceof ZodError) return Response.unprocessable(ctx, { error: e._zod.def });
         return Response.internalError(ctx, { error: (e as any)?.message ?? e });
     }
 };

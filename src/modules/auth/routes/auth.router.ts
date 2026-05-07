@@ -37,8 +37,8 @@ export const authRoutes = {
         { method: "GET", use: [authMiddleware] },
         (ctx) =>
             RouterContainer(ctx, async () => {
-                const { user } = ctx.context;
-                const profile = await authService.getProfile(user._id);
+                const { userId } = ctx.context;
+                const profile = await authService.getProfile(userId);
                 if (!profile) {
                     return Response.notFound(ctx);
                 }
