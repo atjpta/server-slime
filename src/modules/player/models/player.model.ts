@@ -1,4 +1,5 @@
 import { PlayerRole, PlayerStatus } from "@/modules/player/enums/player.enum.js";
+import { ISkill, SkillSchema } from "@/modules/skills/models/skill.model.js";
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IPlayerStats {
@@ -15,6 +16,7 @@ export interface IPlayer extends Document {
     status: PlayerStatus;
     stats: IPlayerStats;
     statsDetail: IStatsDetail;
+    skillIds: Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -118,6 +120,7 @@ const PlayerSchema = new Schema<IPlayer>(
         },
         stats: PlayerStatsSchema,
         statsDetail: StatsDetailSchema,
+        skillIds: { type: [Schema.Types.ObjectId], ref: "Skill", default: [] },
     },
     { timestamps: true }
 );

@@ -10,3 +10,14 @@ export async function connectMongoDB() {
         process.exit(1);
     }
 }
+
+export async function RunSeed(seeds: (() => Promise<void>)[]) {
+    try {
+        for (const seed of seeds) {
+            await seed();
+            console.log(`[Seed] Done: ${seed.name}`);
+        }
+    } catch (err) {
+        console.error("[Seed] Failed:", err);
+    }
+}

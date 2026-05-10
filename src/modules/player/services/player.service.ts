@@ -10,6 +10,7 @@ import { paginateQueryBuilder } from "@/shares/services/pagination.service.js";
 import { Types } from "mongoose";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { AuthRoomPlayer } from "@/modules/player/types/auth-player.type.js";
+import { skillService } from "@/modules/skills/services/skill.service.js";
 
 export class PlayerService {
     async create(userId: Types.ObjectId, name: string) {
@@ -18,11 +19,14 @@ export class PlayerService {
             return;
         }
         const stats = this.getStatsInit();
+        const skillDefault = await skillService.getSkillDefault();
+        const skillIds = Object.values(skillDefault).map((e) => e._id);
         const player = await PlayerModel.create({
             userId,
             name,
             stats: stats.statsInit,
             statsDetail: stats.statsDetailInit,
+            skillIds,
         });
         return player.toObject();
     }
