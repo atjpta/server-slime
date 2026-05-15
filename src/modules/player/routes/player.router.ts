@@ -14,7 +14,7 @@ const authPlayerEndpoint = createEndpoint.create({ use: [authPlayerMiddleware] }
 const prefix = "/players";
 
 export const playerRoutes = {
-    create: authEndpoint(prefix, { method: "POST", body: CreatePlayerSchema }, (ctx) =>
+    playerCreate: authEndpoint(prefix, { method: "POST", body: CreatePlayerSchema }, (ctx) =>
         RouterContainer(ctx, async () => {
             const { userId } = ctx.context;
             const { name } = ctx.body;
@@ -26,7 +26,7 @@ export const playerRoutes = {
         })
     ),
 
-    index: authEndpoint(`${prefix}`, { method: "GET", query: PlayerFilterSchema }, (ctx) =>
+    playerIndex: authEndpoint(`${prefix}`, { method: "GET", query: PlayerFilterSchema }, (ctx) =>
         RouterContainer(ctx, async () => {
             const { userId } = ctx.context;
             const records = await playerService.getList(ctx.query, userId, [
@@ -39,7 +39,7 @@ export const playerRoutes = {
         })
     ),
 
-    show: authPlayerEndpoint(`${prefix}/me`, { method: "GET", params: ObjectIdSchema }, (ctx) =>
+    playerShow: authPlayerEndpoint(`${prefix}/me`, { method: "GET", params: ObjectIdSchema }, (ctx) =>
         RouterContainer(ctx, async () => {
             const player = await playerService.getById(ctx.context.playerId);
             if (!player) return Response.notFound(ctx);
@@ -47,7 +47,7 @@ export const playerRoutes = {
         })
     ),
 
-    delete: authEndpoint(`${prefix}/:id`, { method: "DELETE", params: ObjectIdSchema }, (ctx) =>
+    playerDelete: authEndpoint(`${prefix}/:id`, { method: "DELETE", params: ObjectIdSchema }, (ctx) =>
         RouterContainer(ctx, async () => {
             const { id } = ObjectIdSchema.parse(ctx.params);
             const player = await playerService.delete(id);
@@ -56,7 +56,7 @@ export const playerRoutes = {
         })
     ),
 
-    selectPlayer: authEndpoint(
+    playerSelectPlayer: authEndpoint(
         `${prefix}/select-player/:id`,
         { method: "POST", params: ObjectIdSchema },
         (ctx) =>

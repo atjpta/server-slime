@@ -1,6 +1,5 @@
 import { SkillType } from "@/modules/skills/enums/skill.enum.js";
 import { SkillModel } from "@/modules/skills/models/skill.model.js";
-import { Types } from "mongoose";
 
 export class SkillService {
     async getSkillDefault() {

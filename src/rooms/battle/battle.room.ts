@@ -1,41 +1,69 @@
-import { Client, CloseCode } from "colyseus";
+import { CloseCode } from "colyseus";
+import { Dispatcher } from "@colyseus/command";
 import { BaseRoomPlayer } from "@/rooms/base/base.room.js";
-import { MyRoomState } from "./schema/battle.state.shema.js";
-import { AuthRoomPlayer } from "@/modules/player/types/auth-player.type.js";
+import { BattleEventEnum, BattlePhaseEnum } from "@/rooms/battle/enums/battle.enum.js";
 import { ClientRoomPlayer } from "@/rooms/base/types/client-room-player.type.js";
+import { OnJoinBattleCommand } from "@/rooms/battle/commands/on-join.battle.command.js";
+import { SubmitActionsBattleCommand } from "@/rooms/battle/commands/submit-actions.battle.command.js";
+import { BattleState } from "@/rooms/battle/schema/battle.state.js";
+import { Player } from "@/modules/player/models/player.model.js";
+import { Skill } from "@/modules/skills/models/skill.model.js";
+import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
+import { IBattleLogDetail } from "@/modules/battle-log/models/battle-log.model.js";
+import { OnReconnectBattleCommand } from "@/rooms/battle/commands/on-reconnect.battle.command.js";
 
 export class BattleRoom extends BaseRoomPlayer {
     maxClients = 2;
-    state = new MyRoomState();
+    state = new BattleState();
+    dispatcher = new Dispatcher(this);
+    selectionTimer: ReturnType<typeof this.clock.setTimeout> | null = null;
+
+    actions = new Map<string, number[]>();
+    skills = new Map<string, Skill[]>();
+    players = new Map<string, Player>();
+    logs: IBattleLogDetail[] = [];
 
     messages = {
-        yourMessageType: (client: ClientRoomPlayer, message: any) => {
-            console.log(client.sessionId, "sent a message:", message);
+        submit_actions_battle: (client: ClientRoomPlayer, actions: number[]) => {
+            this.dispatcher.dispatch(new SubmitActionsBattleCommand(), { client, actions });
         },
     };
 
-    onCreate(options: any) {
-        console.log("BattleRoom is created ");
+    onCreate() {
+        this.state.phase = BattlePhaseEnum.WAITING;
     }
 
-    onJoin(client: ClientRoomPlayer, options: any) {
-        console.log(client);
-
-        console.log(`${client.sessionId} - ${client.auth.playerId}`, "joined!");
+    async onJoin(client: ClientRoomPlayer, options: any) {
+        const playerId = client.auth.playerId.toString();
+        this.dispatcher.dispatch(new OnJoinBattleCommand(), { playerId, client });
     }
 
-    async onLeave(client: ClientRoomPlayer, code: CloseCode) {
-        await this.allowReconnection(client, 30);
+    async onLeave(client: ClientRoomPlayer, _code: CloseCode) {
+        if (this.state.phase !== BattlePhaseEnum.ENDED) {
+            try {
+                await this.allowReconnection(client, BattleConstants.RECONNECTION_S);
+            } catch (e) {
+                // client disconnected before fully joining
+            }
+        }
     }
 
     async onDrop(client: ClientRoomPlayer, code: CloseCode) {
-        await this.allowReconnection(client, 30);
+        if (this.state.phase !== BattlePhaseEnum.ENDED) {
+            await this.allowReconnection(client, BattleConstants.RECONNECTION_S);
+        }
     }
 
     onDispose() {
-        /**
-         * Called when the room is disposed.
-         */
-        console.log("room", this.roomId, "disposing...");
+        this.dispatcher.stop();
+    }
+
+    onUncaughtException(err: Error, methodName: string) {
+        console.log(err);
+        console.log(methodName);
+    }
+
+    onReconnect(client: ClientRoomPlayer) {
+        this.dispatcher.dispatch(new OnReconnectBattleCommand(), { client });
     }
 }

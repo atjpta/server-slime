@@ -1,6 +1,7 @@
 import { BattleRoom } from "@/rooms/battle/battle.room.js";
+import { QueueRoom } from "@/rooms/queue/queue.room.js";
 import { QueueRoomService } from "@/rooms/queue/service/queue-room.service.js";
-import { defineRoom, QueueRoom } from "colyseus";
+import { defineRoom } from "colyseus";
 
 export const rooms = {
     battle: defineRoom(BattleRoom),

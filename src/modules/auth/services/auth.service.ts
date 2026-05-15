@@ -1,4 +1,4 @@
-import { IUser, UserModel } from "@/modules/auth/models/user.model.js";
+import { User, UserModel } from "@/modules/auth/models/user.model.js";
 import { env } from "@/configs/env.config.js";
 import bcrypt from "bcryptjs";
 import jwt, { JwtPayload } from "jsonwebtoken";

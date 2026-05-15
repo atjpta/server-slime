@@ -1,3 +1,5 @@
+import { PlayerModel } from "@/modules/player/models/player.model.js";
+import { playerService } from "@/modules/player/services/player.service.js";
 import { SkillType } from "@/modules/skills/enums/skill.enum.js";
 import { SkillModel } from "@/modules/skills/models/skill.model.js";
 import { skillService } from "@/modules/skills/services/skill.service.js";
@@ -31,10 +33,15 @@ export const SkillSeed = async () => {
         }))
     );
 
-    // const skillDefault = await skillService.getSkillDefault();
-    // const skillIds = skillDefault.map((e) => e._id);
+    // const playerSkillDefault = await playerService.getPlayerSkillDefault();
     // await PlayerModel.updateMany(
-    //     { $or: [{ skillIds: { $size: 0 } }, { skillIds: { $exists: false } }] },
-    //     { $set: { skillIds } }
+    //     { $or: [{ skills: { $size: 0 } }, { skills: { $exists: false } }] },
+    //     { $set: { skills: playerSkillDefault } }
     // );
+
+    //   const playerSkillDefault = await playerService.getPlayerSkillDefault();
+    //   await PlayerModel.updateMany(
+    //       { $or: [{ skills: { $size: 3 } }, { skills: { $exists: false } }] },
+    //       { $set: { skills: playerSkillDefault } }
+    //   );
 };

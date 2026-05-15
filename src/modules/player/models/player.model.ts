@@ -1,22 +1,28 @@
+import { User } from "@/modules/auth/models/user.model.js";
 import { PlayerRole, PlayerStatus } from "@/modules/player/enums/player.enum.js";
-import { ISkill, SkillSchema } from "@/modules/skills/models/skill.model.js";
-import mongoose, { Document, Schema, Types } from "mongoose";
+import { Skill } from "@/modules/skills/models/skill.model.js";
+import mongoose, { Document, Schema } from "mongoose";
 
-export interface IPlayerStats {
+export interface PlayerSkill {
+    skill: Skill;
+    orderIndex: number;
+}
+
+export interface PlayerStats {
     hp: number;
     attack: number;
     magic: number;
     defense: number;
 }
 
-export interface IPlayer extends Document {
-    userId: Types.ObjectId;
+export interface Player extends Document {
+    user: User;
     name: string;
     role: PlayerRole;
     status: PlayerStatus;
-    stats: IPlayerStats;
+    stats: PlayerStats;
     statsDetail: IStatsDetail;
-    skillIds: Types.ObjectId[];
+    skills: PlayerSkill[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -92,7 +98,15 @@ const StatsDetailSchema = new Schema<IStatsDetail>(
     { _id: false }
 );
 
-const PlayerStatsSchema = new Schema<IPlayerStats>(
+const PlayerSkillSchema = new Schema<PlayerSkill>(
+    {
+        skill: { type: Schema.Types.ObjectId, ref: "Skill", required: true },
+        orderIndex: { type: Number, required: true },
+    },
+    { _id: false }
+);
+
+export const PlayerStatsSchema = new Schema<PlayerStats>(
     {
         hp: { type: Number, required: true },
         attack: { type: Number, required: true },
@@ -102,9 +116,9 @@ const PlayerStatsSchema = new Schema<IPlayerStats>(
     { _id: false }
 );
 
-const PlayerSchema = new Schema<IPlayer>(
+export const PlayerSchema = new Schema<Player>(
     {
-        userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+        user: { type: Schema.Types.ObjectId, ref: "User", required: true },
         name: { type: String, required: true, trim: true, unique: true },
         status: {
             type: String,
@@ -120,9 +134,9 @@ const PlayerSchema = new Schema<IPlayer>(
         },
         stats: PlayerStatsSchema,
         statsDetail: StatsDetailSchema,
-        skillIds: { type: [Schema.Types.ObjectId], ref: "Skill", default: [] },
+        skills: { type: [PlayerSkillSchema], default: [] },
     },
     { timestamps: true }
 );
 
-export const PlayerModel = mongoose.model<IPlayer>("Player", PlayerSchema);
+export const PlayerModel = mongoose.model<Player>("Player", PlayerSchema);

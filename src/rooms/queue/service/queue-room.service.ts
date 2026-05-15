@@ -1,4 +1,4 @@
-import { matchMaker, QueueOptions } from "colyseus";
+import { QueueOptions } from "@/rooms/queue/queue.room.js";
 
 export class QueueRoomService {
     static GetOptions(matchRoomName: string): QueueOptions {

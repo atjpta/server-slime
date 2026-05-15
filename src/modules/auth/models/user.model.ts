@@ -1,7 +1,7 @@
 import { UserStatus } from "@/modules/auth/enums/user.enum.js";
 import mongoose, { Document, Schema } from "mongoose";
 
-export interface IUser extends Document {
+export interface User extends Document {
     email: string;
     password: string;
     status: UserStatus;
@@ -9,10 +9,10 @@ export interface IUser extends Document {
     updatedAt: Date;
 }
 
-const UserSchema = new Schema<IUser>({
+const UserSchema = new Schema<User>({
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, select: false },
     status: { type: String, enum: Object.values(UserStatus), default: UserStatus.ACTIVE },
 });
 
-export const UserModel = mongoose.model<IUser>("User", UserSchema);
+export const UserModel = mongoose.model<User>("User", UserSchema);

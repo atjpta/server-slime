@@ -1,14 +1,14 @@
 import { env } from "@/configs/env.config.js";
 import {
-    IPlayer,
-    IPlayerStats,
+    Player,
+    PlayerStats,
     IStatsDetail,
     PlayerModel,
 } from "@/modules/player/models/player.model.js";
 import { PlayerFilter } from "@/modules/player/validators/player.validator.js";
 import { paginateQueryBuilder } from "@/shares/services/pagination.service.js";
 import { Types } from "mongoose";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { AuthRoomPlayer } from "@/modules/player/types/auth-player.type.js";
 import { skillService } from "@/modules/skills/services/skill.service.js";
 
@@ -20,27 +20,30 @@ export class PlayerService {
         }
         const stats = this.getStatsInit();
         const skillDefault = await skillService.getSkillDefault();
-        const skillIds = Object.values(skillDefault).map((e) => e._id);
+        const skills = skillDefault.map((e, index) => ({
+            skill: e._id,
+            orderIndex: index + 1,
+        }));
         const player = await PlayerModel.create({
-            userId,
+            user: userId,
             name,
             stats: stats.statsInit,
             statsDetail: stats.statsDetailInit,
-            skillIds,
+            skills,
         });
         return player.toObject();
     }
 
-    async getById(id: Types.ObjectId) {
-        return PlayerModel.findById(id).lean();
+    async getById(id: Types.ObjectId | string) {
+        return PlayerModel.findById(id).populate("skills.skill").lean();
     }
 
     async getList(
         filter: PlayerFilter,
         userId: Types.ObjectId,
-        select?: (keyof IPlayer & string)[]
+        select?: (keyof Player & string)[]
     ) {
-        return paginateQueryBuilder<IPlayer>(PlayerModel, { userId }, filter, select);
+        return paginateQueryBuilder<Player>(PlayerModel, { user: userId }, filter, select);
     }
 
     async delete(id: string) {
@@ -67,7 +70,7 @@ export class PlayerService {
         return { statsDetailInit, statsInit };
     }
 
-    calStatsDetail(statsDetail: IStatsDetail): IPlayerStats {
+    calStatsDetail(statsDetail: IStatsDetail): PlayerStats {
         const hp = Object.values(statsDetail.hp).reduce((sum, val) => sum + val, 0);
         const attack = Object.values(statsDetail.attack).reduce((sum, val) => sum + val, 0);
         const magic = Object.values(statsDetail.magic).reduce((sum, val) => sum + val, 0);
@@ -76,12 +79,12 @@ export class PlayerService {
     }
 
     async selectPlayer(userId: Types.ObjectId, id: string) {
-        const player = await PlayerModel.findOne({ userId, _id: id }).lean();
+        const player = await PlayerModel.findOne({ user: userId, _id: id }).lean();
         if (!player) {
             return;
         }
 
-        const token = jwt.sign({ playerId: player._id }, env.JWT_SECRET, {
+        const token = jwt.sign({ playerId: player._id, userId }, env.JWT_SECRET, {
             expiresIn: "30d",
         });
         return { token };
@@ -89,6 +92,12 @@ export class PlayerService {
 
     verifyToken(token: string) {
         return jwt.verify(token, env.JWT_SECRET) as AuthRoomPlayer;
+    }
+
+    async getPlayerSkillDefault() {
+        const skillDefault = await skillService.getSkillDefault();
+        const playerSkills = skillDefault.map((e, index) => ({ skill: e._id, orderIndex: index }));
+        return playerSkills;
     }
 }
 

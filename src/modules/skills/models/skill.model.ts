@@ -2,13 +2,13 @@ import { PlayerRole, PlayerStatus } from "@/modules/player/enums/player.enum.js"
 import { SkillType } from "@/modules/skills/enums/skill.enum.js";
 import mongoose, { Document, Schema, Types } from "mongoose";
 
-export interface IscaleValueSkill {
+export interface IScaleValueSkill {
     attack?: number;
     magic?: number;
     attackEnemy?: number;
 }
 
-const ScaleValueSkillSchema = new Schema<IscaleValueSkill>(
+export const ScaleValueSkillSchema = new Schema<IScaleValueSkill>(
     {
         attack: { type: Number },
         magic: { type: Number },
@@ -17,15 +17,15 @@ const ScaleValueSkillSchema = new Schema<IscaleValueSkill>(
     { timestamps: false, _id: false }
 );
 
-export interface ISkill extends Document {
+export interface Skill extends Document {
     code: string;
     type: SkillType;
-    scale: IscaleValueSkill;
+    scale: IScaleValueSkill;
     createdAt: Date;
     updatedAt: Date;
 }
 
-export const SkillSchema = new Schema<ISkill>(
+export const SkillSchema = new Schema<Skill>(
     {
         code: { type: String, required: true, trim: true, unique: true },
         type: {
@@ -38,4 +38,4 @@ export const SkillSchema = new Schema<ISkill>(
     { timestamps: true }
 );
 
-export const SkillModel = mongoose.model<ISkill>("Skill", SkillSchema);
+export const SkillModel = mongoose.model<Skill>("Skill", SkillSchema);

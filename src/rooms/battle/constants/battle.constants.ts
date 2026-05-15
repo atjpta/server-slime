@@ -1,0 +1,9 @@
+export const BattleConstants = {
+    MAX_WAVE: 10,
+    TURNS_PER_WAVE: 5,
+    SELECTION_TIME_MS: 5_000,
+    SELECTION_TIME_OUT_MS: 5_000,
+    WAVE_ANIMATION_MS: 5_000,
+    TURN_ANIMATION_MS: 1_000,
+    RECONNECTION_S: 60,
+};
