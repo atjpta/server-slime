@@ -17,6 +17,8 @@ export class BattleRoom extends BaseRoomPlayer {
     state = new BattleState();
     dispatcher = new Dispatcher(this);
     selectionTimer: ReturnType<typeof this.clock.setTimeout> | null = null;
+    botPlayerId: string | null = null;
+    withBot: boolean = false;
 
     actions = new Map<string, number[]>();
     skills = new Map<string, Skill[]>();
@@ -29,8 +31,9 @@ export class BattleRoom extends BaseRoomPlayer {
         },
     };
 
-    onCreate() {
+    onCreate(options: { withBot?: boolean } = {}) {
         this.state.phase = BattlePhaseEnum.WAITING;
+        this.withBot = options.withBot ?? false;
     }
 
     async onJoin(client: ClientRoomPlayer, options: any) {

@@ -6,6 +6,7 @@ import {
     PlayerModel,
 } from "@/modules/player/models/player.model.js";
 import { PlayerFilter } from "@/modules/player/validators/player.validator.js";
+import { PlayerRole } from "@/modules/player/enums/player.enum.js";
 import { paginateQueryBuilder } from "@/shares/services/pagination.service.js";
 import { Types } from "mongoose";
 import jwt from "jsonwebtoken";
@@ -36,6 +37,13 @@ export class PlayerService {
 
     async getById(id: Types.ObjectId | string) {
         return PlayerModel.findById(id).populate("skills.skill").lean();
+    }
+
+    async getRandomBot() {
+        const count = await PlayerModel.countDocuments({ role: PlayerRole.BOT });
+        if (count === 0) return null;
+        const skip = Math.floor(Math.random() * count);
+        return PlayerModel.findOne({ role: PlayerRole.BOT }).skip(skip).populate("skills.skill").lean();
     }
 
     async getList(

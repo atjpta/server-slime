@@ -9,6 +9,7 @@ import { ClientRoomPlayer } from "@/rooms/base/types/client-room-player.type.js"
 import { BattlePhaseEnum } from "@/rooms/battle/enums/battle.enum.js";
 import { OnReconnectBattleCommand } from "@/rooms/battle/commands/on-reconnect.battle.command.js";
 import { IPlayerTurnLog } from "@/modules/battle-log/models/battle-log.model.js";
+import { OnBotJoinBattleCommand } from "@/rooms/battle/commands/on-bot-join.battle.command.js";
 
 interface Payload {
     playerId: string;
@@ -25,6 +26,10 @@ export class OnJoinBattleCommand extends Command<BattleRoom, Payload> {
         this.state.players.set(playerId, BattlePlayerState.from(p));
         this.room.players.set(playerId, p);
         this.room.skills.set(playerId, battleService.genSkillArray(p.skills));
+
+        if (this.state.players.size === 1 && this.room.withBot) {
+            this.room.dispatcher.dispatch(new OnBotJoinBattleCommand());
+        }
 
         if (this.state.players.size === 2) {
             const initialPlayers = new Map<string, IPlayerTurnLog>();

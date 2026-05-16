@@ -1,3 +1,4 @@
+import { matchMaker } from "colyseus";
 import { QueueOptions } from "@/rooms/queue/queue.room.js";
 
 export class QueueRoomService {
@@ -5,8 +6,13 @@ export class QueueRoomService {
         return {
             matchRoomName,
             maxPlayers: 2,
-            maxWaitingCycles: 15,
-            maxWaitingCyclesForPriority: 10,
+            maxWaitingCycles: 10,
+            maxWaitingCyclesForPriority: 8,
+            allowIncompleteGroups: true,
+            onGroupReady: async function (group) {
+                const withBot = group.clients.length < this.maxPlayers;
+                return matchMaker.createRoom(this.matchRoomName, { withBot });
+            },
         };
     }
 }

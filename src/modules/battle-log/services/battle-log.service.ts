@@ -37,6 +37,7 @@ export class BattleLogService {
         const [items, total] = await Promise.all([
             BattleLogModel.find(query)
                 .select("-logs")
+                .sort({ createdAt: -1 })
                 .populate([{ path: "players.player", select: "_id name" }])
                 .skip(skip)
                 .limit(limit)

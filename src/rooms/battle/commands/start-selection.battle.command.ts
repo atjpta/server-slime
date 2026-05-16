@@ -26,6 +26,16 @@ export class StartSelectionBattleCommand extends Command<BattleRoom> {
             if (timeLeft <= 0) ticker.clear();
         }, 1000);
 
+        if (this.room.botPlayerId) {
+            const botId = this.room.botPlayerId;
+            const botActions = battleService.getActionRandom(
+                this.room.skills.get(botId),
+                `${this.room.roomId}-${botId}-${this.state.wave}`
+            );
+            this.room.actions.set(botId, botActions);
+            this.state.players.get(botId).ready = true;
+        }
+
         this.room.selectionTimer = this.clock.setTimeout(() => {
             ticker.clear();
             for (const [pId, _] of this.state.players) {
