@@ -9,7 +9,7 @@ import { battleLogRoutes } from "@/modules/battle-log/routes/battle-log.router.j
 import { env } from "@/configs/env.config.js";
 // import { redisDriver } from "@/configs/redis.config.js";
 
-await connectMongoDB();
+connectMongoDB();
 listen(
     defineServer({
         rooms,
@@ -29,5 +29,6 @@ listen(
             ...battleLogRoutes,
         }),
         transport: new uWebSocketsTransport({}, {}),
-    })
+    }),
+    env.PORT
 );
