@@ -13,6 +13,6 @@ export class EndBattleCommand extends Command<BattleRoom, Payload> {
         this.state.phase = BattlePhaseEnum.ENDED;
         this.state.winner = winner;
         await battleLogService.createByBattleRoom(this.room, winner, endReason);
-        this.clock.setTimeout(() => this.room.disconnect(), 3000);
+        this.room.disconnect();
     }
 }

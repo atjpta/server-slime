@@ -17,13 +17,21 @@ export class StartSelectionBattleCommand extends Command<BattleRoom> {
             p.actions.clear();
         }
 
+        if (this.room.selectionTicker) {
+            this.room.selectionTicker.clear();
+            this.room.selectionTicker = null;
+        }
+
         let timeLeft = BattleConstants.SELECTION_TIME_MS / 1000;
         this.state.timeLeft = timeLeft;
 
-        const ticker = this.clock.setInterval(() => {
+        this.room.selectionTicker = this.clock.setInterval(() => {
             timeLeft -= 1;
             this.state.timeLeft = timeLeft;
-            if (timeLeft <= 0) ticker.clear();
+            if (timeLeft <= 0) {
+                this.room.selectionTicker?.clear();
+                this.room.selectionTicker = null;
+            }
         }, 1000);
 
         if (this.room.botPlayerId) {
@@ -37,14 +45,18 @@ export class StartSelectionBattleCommand extends Command<BattleRoom> {
         }
 
         this.room.selectionTimer = this.clock.setTimeout(() => {
-            ticker.clear();
+            this.room.selectionTicker?.clear();
+            this.room.selectionTicker = null;
             for (const [pId, _] of this.state.players) {
                 if (this.room.actions.has(pId)) {
                     continue;
                 }
                 this.room.actions.set(
                     pId,
-                    battleService.getActionRandom(this.room.skills.get(pId), `${this.room.roomId}-${pId}-${this.state.wave}`)
+                    battleService.getActionRandom(
+                        this.room.skills.get(pId),
+                        `${this.room.roomId}-${pId}-${this.state.wave}`
+                    )
                 );
                 this.state.players.get(pId).ready = true;
             }

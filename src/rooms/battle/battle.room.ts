@@ -17,6 +17,7 @@ export class BattleRoom extends BaseRoomPlayer {
     state = new BattleState();
     dispatcher = new Dispatcher(this);
     selectionTimer: ReturnType<typeof this.clock.setTimeout> | null = null;
+    selectionTicker: ReturnType<typeof this.clock.setInterval> | null = null;
     botPlayerId: string | null = null;
     withBot: boolean = false;
 
