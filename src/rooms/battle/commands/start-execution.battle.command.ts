@@ -9,7 +9,7 @@ import {
 import { battleService } from "@/rooms/battle/services/battle.service.js";
 import { EndBattleCommand } from "@/rooms/battle/commands/end-battle.command.js";
 import { StartSelectionBattleCommand } from "@/rooms/battle/commands/start-selection.battle.command.js";
-import { IBattleLogDetail, IPlayerTurnLog } from "@/modules/battle-log/models/battle-log.model.js";
+import { BattleLogDetail, PlayerTurnLog } from "@/modules/battle-log/models/battle-log.model.js";
 
 export class StartExecutionBattleCommand extends Command<BattleRoom> {
     async execute() {
@@ -43,11 +43,11 @@ export class StartExecutionBattleCommand extends Command<BattleRoom> {
                 { skill: p2Skill, stats: p2Stats }
             );
 
-            const players = new Map<string, IPlayerTurnLog>([
+            const players = new Map<string, PlayerTurnLog>([
                 [p1Id, { action: p1Action, damageReceive: p1Effects, stats: { ...p1Stats } }],
                 [p2Id, { action: p2Action, damageReceive: p2Effects, stats: { ...p2Stats } }],
             ]);
-            const turnLog: IBattleLogDetail = { turn, wave, players };
+            const turnLog: BattleLogDetail = { turn, wave, players };
             this.room.logs.push(turnLog);
             this.room.broadcast(BattleEventEnum.BATTLE_LOG, turnLog);
 

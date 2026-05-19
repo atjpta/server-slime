@@ -2,14 +2,14 @@ import { EndpointContext, EndpointOptions } from "colyseus";
 import { APIError } from "@colyseus/better-call";
 import { ZodError } from "zod";
 
-interface IRes {
+interface Res {
     data: any;
     message: string;
     error: any;
     code: string | null;
 }
 
-export interface IResRaw {
+export interface ResRaw {
     data?: any;
     message?: string;
     error?: any;
@@ -49,7 +49,7 @@ export enum HttpStatusCode {
 export type Ctx = EndpointContext<string, EndpointOptions>;
 
 export const Response = {
-    ok(res: IResRaw = {}): IRes {
+    ok(res: ResRaw = {}): Res {
         return {
             data: res.data ?? null,
             message: res.message ?? "✅ Success",
@@ -58,7 +58,7 @@ export const Response = {
         };
     },
 
-    created(ctx: Ctx, res: IResRaw = {}): IRes {
+    created(ctx: Ctx, res: ResRaw = {}): Res {
         ctx.setStatus(HttpStatusCode.CREATED);
         return {
             data: res.data ?? null,
@@ -68,7 +68,7 @@ export const Response = {
         };
     },
 
-    noContent(ctx: Ctx, res: IResRaw = {}): IRes {
+    noContent(ctx: Ctx, res: ResRaw = {}): Res {
         ctx.setStatus(HttpStatusCode.NO_CONTENT);
         return {
             data: null,
@@ -78,7 +78,7 @@ export const Response = {
         };
     },
 
-    badRequest(ctx: Ctx, res: IResRaw = {}): IRes {
+    badRequest(ctx: Ctx, res: ResRaw = {}): Res {
         throw ctx.error(HttpStatusCode.BAD_REQUEST, {
             data: null,
             message: res.message ?? "❌ Bad request",
@@ -87,7 +87,7 @@ export const Response = {
         });
     },
 
-    unauthorized(ctx: Ctx, res: IResRaw = {}): IRes {
+    unauthorized(ctx: Ctx, res: ResRaw = {}): Res {
         throw ctx.error(HttpStatusCode.UNAUTHORIZED, {
             data: null,
             message: res.message ?? "🔒 Unauthorized",
@@ -96,7 +96,7 @@ export const Response = {
         });
     },
 
-    forbidden(ctx: Ctx, res: IResRaw = {}): IRes {
+    forbidden(ctx: Ctx, res: ResRaw = {}): Res {
         throw ctx.error(HttpStatusCode.FORBIDDEN, {
             data: null,
             message: res.message ?? "⛔ Forbidden",
@@ -105,7 +105,7 @@ export const Response = {
         });
     },
 
-    notFound(ctx: Ctx, res: IResRaw = {}): IRes {
+    notFound(ctx: Ctx, res: ResRaw = {}): Res {
         throw ctx.error(HttpStatusCode.NOT_FOUND, {
             data: null,
             message: res.message ?? "🔍 Not found",
@@ -114,7 +114,7 @@ export const Response = {
         });
     },
 
-    conflict(ctx: Ctx, res: IResRaw = {}): IRes {
+    conflict(ctx: Ctx, res: ResRaw = {}): Res {
         throw ctx.error(HttpStatusCode.CONFLICT, {
             data: null,
             message: res.message ?? "⚡ Conflict",
@@ -123,7 +123,7 @@ export const Response = {
         });
     },
 
-    unprocessable(ctx: Ctx, res: IResRaw = {}): IRes {
+    unprocessable(ctx: Ctx, res: ResRaw = {}): Res {
         throw ctx.error(HttpStatusCode.UNPROCESSABLE_ENTITY, {
             data: null,
             message: res.message ?? "⚠️ Unprocessable entity",
@@ -132,7 +132,7 @@ export const Response = {
         });
     },
 
-    internalError(ctx: Ctx, res: IResRaw = {}): IRes {
+    internalError(ctx: Ctx, res: ResRaw = {}): Res {
         throw ctx.error(HttpStatusCode.INTERNAL_SERVER_ERROR, {
             data: null,
             message: res.message ?? "💥 Internal server error",
@@ -142,7 +142,7 @@ export const Response = {
     },
 };
 
-export const RouterContainer = async (ctx: Ctx, fn: () => Promise<IRes>): Promise<IRes> => {
+export const RouterContainer = async (ctx: Ctx, fn: () => Promise<Res>): Promise<Res> => {
     try {
         return await fn();
     } catch (e) {

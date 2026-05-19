@@ -5,38 +5,38 @@ import { BattleEndReasonEnum } from "@/rooms/battle/enums/battle.enum.js";
 import { EffectBattleEnum } from "@/rooms/battle/enums/effect.enum.js";
 import mongoose, { Document, Schema } from "mongoose";
 
-export interface IEffectBattle {
+export interface EffectBattle {
     typeEffect: EffectBattleEnum;
     value: number;
 }
 
-export interface IBattlePlayerLog {
+export interface BattlePlayerLog {
     player: Player;
     stats: PlayerStats;
     skills: Skill[];
 }
 
-export interface IPlayerTurnLog {
+export interface PlayerTurnLog {
     action: number;
-    damageReceive: IEffectBattle[];
+    damageReceive: EffectBattle[];
     stats: PlayerStats;
 }
 
-export interface IBattleLogDetail {
+export interface BattleLogDetail {
     wave: number;
     turn: number;
-    players: Map<string, IPlayerTurnLog>;
+    players: Map<string, PlayerTurnLog>;
 }
 
-export interface IBattleLog extends Document {
-    players: IBattlePlayerLog[];
-    logs: IBattleLogDetail[];
+export interface BattleLog extends Document {
+    players: BattlePlayerLog[];
+    logs: BattleLogDetail[];
     winner: Player | null;
     endReason: BattleEndReasonEnum;
     createdAt: Date;
 }
 
-const EffectBattleSchema = new Schema<IEffectBattle>(
+const EffectBattleSchema = new Schema<EffectBattle>(
     {
         typeEffect: { type: String, required: true, enum: Object.values(EffectBattleEnum) },
         value: { type: Number, required: true },
@@ -44,7 +44,7 @@ const EffectBattleSchema = new Schema<IEffectBattle>(
     { _id: false }
 );
 
-const PlayerTurnLogSchema = new Schema<IPlayerTurnLog>(
+const PlayerTurnLogSchema = new Schema<PlayerTurnLog>(
     {
         action: { type: Number, required: true },
         damageReceive: [EffectBattleSchema],
@@ -53,7 +53,7 @@ const PlayerTurnLogSchema = new Schema<IPlayerTurnLog>(
     { _id: false }
 );
 
-const BattleLogDetailSchema = new Schema<IBattleLogDetail>(
+const BattleLogDetailSchema = new Schema<BattleLogDetail>(
     {
         wave: { type: Number, required: true },
         turn: { type: Number, required: true },
@@ -72,7 +72,7 @@ const EmbeddedSkillSchema = new Schema<Skill>(
     { _id: false, timestamps: false }
 );
 
-const BattlePlayerLogSchema = new Schema<IBattlePlayerLog>(
+const BattlePlayerLogSchema = new Schema<BattlePlayerLog>(
     {
         player: { type: Schema.Types.ObjectId, ref: "Player", required: true },
         stats: { type: PlayerStatsSchema, required: true },
@@ -81,7 +81,7 @@ const BattlePlayerLogSchema = new Schema<IBattlePlayerLog>(
     { _id: false }
 );
 
-const BattleLogSchema = new Schema<IBattleLog>(
+const BattleLogSchema = new Schema<BattleLog>(
     {
         players: [BattlePlayerLogSchema],
         logs: [BattleLogDetailSchema],
@@ -91,4 +91,4 @@ const BattleLogSchema = new Schema<IBattleLog>(
     { timestamps: true }
 );
 
-export const BattleLogModel = mongoose.model<IBattleLog>("BattleLog", BattleLogSchema);
+export const BattleLogModel = mongoose.model<BattleLog>("BattleLog", BattleLogSchema);

@@ -1,20 +1,20 @@
 import seedrandom from "seedrandom";
 import { PlayerSkill, PlayerStats } from "@/modules/player/models/player.model.js";
 import { SkillType } from "@/modules/skills/enums/skill.enum.js";
-import { IScaleValueSkill, Skill } from "@/modules/skills/models/skill.model.js";
+import { ScaleValueSkill, Skill } from "@/modules/skills/models/skill.model.js";
 import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
 import { EffectBattleEnum } from "@/rooms/battle/enums/effect.enum.js";
-import { IEffectBattle } from "@/modules/battle-log/models/battle-log.model.js";
+import { EffectBattle } from "@/modules/battle-log/models/battle-log.model.js";
 
-type ScaleStatKey = keyof IScaleValueSkill & keyof PlayerStats;
+type ScaleStatKey = keyof ScaleValueSkill & keyof PlayerStats;
 
-interface IUpdateStatsBattle {
+interface UpdateStatsBattle {
     skill: Skill;
     stats: PlayerStats;
 }
 
 export class BattleService {
-    calculateDamage(p: IUpdateStatsBattle): number {
+    calculateDamage(p: UpdateStatsBattle): number {
         const scale = p.skill.scale;
         const stats = p.stats;
         return (Object.keys(scale) as ScaleStatKey[]).reduce((total, key) => {
@@ -32,9 +32,9 @@ export class BattleService {
         return Math.max(dmg - stats.defense, 0);
     }
     updateStats(
-        p1: IUpdateStatsBattle,
-        p2: IUpdateStatsBattle
-    ): { p1Effects: IEffectBattle[]; p2Effects: IEffectBattle[] } {
+        p1: UpdateStatsBattle,
+        p2: UpdateStatsBattle
+    ): { p1Effects: EffectBattle[]; p2Effects: EffectBattle[] } {
         const skillP1 = p1.skill;
         const skillP2 = p2.skill;
 
@@ -44,11 +44,11 @@ export class BattleService {
         const statsP1 = p1.stats;
         const statsP2 = p2.stats;
 
-        const p1Effects: IEffectBattle[] = [];
-        const p2Effects: IEffectBattle[] = [];
+        const p1Effects: EffectBattle[] = [];
+        const p2Effects: EffectBattle[] = [];
 
         const applyDmg = (
-            effects: IEffectBattle[],
+            effects: EffectBattle[],
             stats: PlayerStats,
             typeEffect: EffectBattleEnum,
             dmg: number

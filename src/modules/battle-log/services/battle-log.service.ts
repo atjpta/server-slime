@@ -1,5 +1,5 @@
 import { BattleEndReasonEnum } from "@/rooms/battle/enums/battle.enum.js";
-import { BattleLogModel, IBattleLogDetail } from "@/modules/battle-log/models/battle-log.model.js";
+import { BattleLogModel, BattleLogDetail } from "@/modules/battle-log/models/battle-log.model.js";
 import { BattleLogFilter } from "@/modules/battle-log/validators/battle-log.validator.js";
 import { BattleRoom } from "@/rooms/battle/battle.room.js";
 import { Types } from "mongoose";
@@ -12,7 +12,7 @@ export class BattleLogService {
             skills: room.skills.get(p._id.toString()),
         }));
 
-        const logs: IBattleLogDetail[] = room.logs.map((log) => {
+        const logs: BattleLogDetail[] = room.logs.map((log) => {
             return {
                 wave: log.wave,
                 turn: log.turn,

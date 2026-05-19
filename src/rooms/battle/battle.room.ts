@@ -9,7 +9,7 @@ import { BattleState } from "@/rooms/battle/schema/battle.state.js";
 import { Player } from "@/modules/player/models/player.model.js";
 import { Skill } from "@/modules/skills/models/skill.model.js";
 import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
-import { IBattleLogDetail } from "@/modules/battle-log/models/battle-log.model.js";
+import { BattleLogDetail } from "@/modules/battle-log/models/battle-log.model.js";
 import { OnReconnectBattleCommand } from "@/rooms/battle/commands/on-reconnect.battle.command.js";
 
 export class BattleRoom extends BaseRoomPlayer {
@@ -24,7 +24,7 @@ export class BattleRoom extends BaseRoomPlayer {
     actions = new Map<string, number[]>();
     skills = new Map<string, Skill[]>();
     players = new Map<string, Player>();
-    logs: IBattleLogDetail[] = [];
+    logs: BattleLogDetail[] = [];
 
     messages = {
         submit_actions_battle: (client: ClientRoomPlayer, actions: number[]) => {

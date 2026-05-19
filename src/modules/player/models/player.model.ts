@@ -21,24 +21,24 @@ export interface Player extends Document {
     role: PlayerRole;
     status: PlayerStatus;
     stats: PlayerStats;
-    statsDetail: IStatsDetail;
+    statsDetail: StatsDetail;
     skills: PlayerSkill[];
     createdAt: Date;
     updatedAt: Date;
 }
 
-export interface IStatsDetailBase {
+export interface StatsDetailBase {
     base: number;
 }
 
-export interface IStatsDetail {
-    hp: IStatsDetailBase;
-    attack: IStatsDetailBase;
-    magic: IStatsDetailBase;
-    defense: IStatsDetailBase;
+export interface StatsDetail {
+    hp: StatsDetailBase;
+    attack: StatsDetailBase;
+    magic: StatsDetailBase;
+    defense: StatsDetailBase;
 }
 
-export const HpDetailSchema = new Schema<IStatsDetailBase>(
+export const HpDetailSchema = new Schema<StatsDetailBase>(
     {
         base: {
             type: Number,
@@ -47,7 +47,7 @@ export const HpDetailSchema = new Schema<IStatsDetailBase>(
     },
     { _id: false }
 );
-export const AttackDetailSchema = new Schema<IStatsDetailBase>(
+export const AttackDetailSchema = new Schema<StatsDetailBase>(
     {
         base: {
             type: Number,
@@ -56,17 +56,7 @@ export const AttackDetailSchema = new Schema<IStatsDetailBase>(
     },
     { _id: false }
 );
-export const MagicDetailSchema = new Schema<IStatsDetailBase>(
-    {
-        base: {
-            type: Number,
-            required: true,
-        },
-    },
-    { _id: false }
-);
-
-export const DefenseDetailSchema = new Schema<IStatsDetailBase>(
+export const MagicDetailSchema = new Schema<StatsDetailBase>(
     {
         base: {
             type: Number,
@@ -76,7 +66,17 @@ export const DefenseDetailSchema = new Schema<IStatsDetailBase>(
     { _id: false }
 );
 
-const StatsDetailSchema = new Schema<IStatsDetail>(
+export const DefenseDetailSchema = new Schema<StatsDetailBase>(
+    {
+        base: {
+            type: Number,
+            required: true,
+        },
+    },
+    { _id: false }
+);
+
+const StatsDetailSchema = new Schema<StatsDetail>(
     {
         hp: {
             type: HpDetailSchema,

@@ -5,8 +5,7 @@ import { StartSelectionBattleCommand } from "@/rooms/battle/commands/start-selec
 import { BattlePlayerState } from "@/rooms/battle/schema/player.battle.state.js";
 import { battleService } from "@/rooms/battle/services/battle.service.js";
 import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
-import { BattlePhaseEnum } from "@/rooms/battle/enums/battle.enum.js";
-import { IPlayerTurnLog } from "@/modules/battle-log/models/battle-log.model.js";
+import { PlayerTurnLog } from "@/modules/battle-log/models/battle-log.model.js";
 import { OnReconnectBattleCommand } from "@/rooms/battle/commands/on-reconnect.battle.command.js";
 
 export class OnBotJoinBattleCommand extends Command<BattleRoom> {
@@ -24,7 +23,7 @@ export class OnBotJoinBattleCommand extends Command<BattleRoom> {
         this.room.players.set(botId, bot);
         this.room.skills.set(botId, battleService.genSkillArray(bot.skills));
 
-        const initialPlayers = new Map<string, IPlayerTurnLog>();
+        const initialPlayers = new Map<string, PlayerTurnLog>();
         this.room.players.forEach((player, pId) => {
             initialPlayers.set(pId, {
                 action: 0,

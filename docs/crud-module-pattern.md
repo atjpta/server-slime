@@ -43,30 +43,30 @@ export enum FooStatus {
 import { FooStatus } from "@/modules/foo/enums/foo.enum.js";
 import mongoose, { Document, Schema, Types } from "mongoose";
 
-export interface IFoo extends Document {
-    userId: Types.ObjectId;
+export interface Foo extends Document {
+    user: User | Types.ObjectId;
     name: string;
     status: FooStatus;
     createdAt: Date;
     updatedAt: Date;
 }
 
-const FooSchema = new Schema<IFoo>(
+const FooSchema = new Schema<Foo>(
     {
-        userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+        user: { type: Schema.Types.ObjectId, ref: "User", required: true },
         name: { type: String, required: true, trim: true },
         status: { type: String, enum: Object.values(FooStatus), default: FooStatus.ACTIVE },
     },
     { timestamps: true }
 );
 
-export const FooModel = mongoose.model<IFoo>("Foo", FooSchema);
+export const FooModel = mongoose.model<Foo>("Foo", FooSchema);
 ```
 
 > Sub-document (JSON field) dùng Schema riêng với `{ _id: false }`.
 >
 > ```ts
-> const FooStatsSchema = new Schema<IFooStats>(
+> const FooStatsSchema = new Schema<FooStats>(
 >     { hp: { type: Number, default: 1000 } },
 >     { _id: false }
 > );

@@ -2,8 +2,8 @@ import { env } from "@/configs/env.config.js";
 import {
     Player,
     PlayerStats,
-    IStatsDetail,
     PlayerModel,
+    StatsDetail,
 } from "@/modules/player/models/player.model.js";
 import { PlayerFilter } from "@/modules/player/validators/player.validator.js";
 import { PlayerRole } from "@/modules/player/enums/player.enum.js";
@@ -12,6 +12,7 @@ import { Types } from "mongoose";
 import jwt from "jsonwebtoken";
 import { AuthRoomPlayer } from "@/modules/player/types/auth-player.type.js";
 import { skillService } from "@/modules/skills/services/skill.service.js";
+import { rankingService } from "@/modules/ranking/services/ranking.service.js";
 
 export class PlayerService {
     async create(userId: Types.ObjectId, name: string) {
@@ -32,6 +33,7 @@ export class PlayerService {
             statsDetail: stats.statsDetailInit,
             skills,
         });
+        await rankingService.initPlayerRankProfiles(player._id);
         return player.toObject();
     }
 
@@ -43,7 +45,10 @@ export class PlayerService {
         const count = await PlayerModel.countDocuments({ role: PlayerRole.BOT });
         if (count === 0) return null;
         const skip = Math.floor(Math.random() * count);
-        return PlayerModel.findOne({ role: PlayerRole.BOT }).skip(skip).populate("skills.skill").lean();
+        return PlayerModel.findOne({ role: PlayerRole.BOT })
+            .skip(skip)
+            .populate("skills.skill")
+            .lean();
     }
 
     async getList(
@@ -59,7 +64,7 @@ export class PlayerService {
     }
 
     getStatsInit() {
-        const statsDetailInit: IStatsDetail = {
+        const statsDetailInit: StatsDetail = {
             hp: {
                 base: 1000,
             },
@@ -78,7 +83,7 @@ export class PlayerService {
         return { statsDetailInit, statsInit };
     }
 
-    calStatsDetail(statsDetail: IStatsDetail): PlayerStats {
+    calStatsDetail(statsDetail: StatsDetail): PlayerStats {
         const hp = Object.values(statsDetail.hp).reduce((sum, val) => sum + val, 0);
         const attack = Object.values(statsDetail.attack).reduce((sum, val) => sum + val, 0);
         const magic = Object.values(statsDetail.magic).reduce((sum, val) => sum + val, 0);
