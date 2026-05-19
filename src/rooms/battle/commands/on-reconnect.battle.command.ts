@@ -13,6 +13,7 @@ export class OnReconnectBattleCommand extends Command<BattleRoom, Payload> {
             players: this.room.players,
             skills: this.room.skills,
             logs: this.room.logs,
+            rankProfiles: this.room.rankProfiles,
         });
     }
 }

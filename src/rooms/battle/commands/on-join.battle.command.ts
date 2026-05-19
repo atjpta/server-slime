@@ -10,6 +10,8 @@ import { BattlePhaseEnum } from "@/rooms/battle/enums/battle.enum.js";
 import { OnReconnectBattleCommand } from "@/rooms/battle/commands/on-reconnect.battle.command.js";
 import { PlayerTurnLog } from "@/modules/battle-log/models/battle-log.model.js";
 import { OnBotJoinBattleCommand } from "@/rooms/battle/commands/on-bot-join.battle.command.js";
+import { playerRankProfileService } from "@/modules/ranking/services/player-rank-profile.service.js";
+import { Types } from "mongoose";
 
 interface Payload {
     playerId: string;
@@ -22,10 +24,17 @@ export class OnJoinBattleCommand extends Command<BattleRoom, Payload> {
     }
 
     async execute({ playerId }: Payload) {
-        const p = await playerService.getById(playerId);
+        const rankMode = this.state.rankMode;
+        const [p, rankProfile] = await Promise.all([
+            playerService.getById(playerId),
+            rankMode
+                ? playerRankProfileService.getByPlayerAndRankMode(new Types.ObjectId(playerId), rankMode)
+                : Promise.resolve(null),
+        ]);
         this.state.players.set(playerId, BattlePlayerState.from(p));
         this.room.players.set(playerId, p);
         this.room.skills.set(playerId, battleService.genSkillArray(p.skills));
+        this.room.rankProfiles.set(playerId, rankProfile);
 
         if (this.state.players.size === 1 && this.room.withBot) {
             this.room.dispatcher.dispatch(new OnBotJoinBattleCommand());

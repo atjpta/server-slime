@@ -12,7 +12,7 @@ import { Types } from "mongoose";
 import jwt from "jsonwebtoken";
 import { AuthRoomPlayer } from "@/modules/player/types/auth-player.type.js";
 import { skillService } from "@/modules/skills/services/skill.service.js";
-import { rankingService } from "@/modules/ranking/services/ranking.service.js";
+import { playerRankProfileService } from "@/modules/ranking/services/player-rank-profile.service.js";
 
 export class PlayerService {
     async create(userId: Types.ObjectId, name: string) {
@@ -33,7 +33,7 @@ export class PlayerService {
             statsDetail: stats.statsDetailInit,
             skills,
         });
-        await rankingService.initPlayerRankProfiles(player._id);
+        await playerRankProfileService.initPlayerRankProfiles(player._id);
         return player.toObject();
     }
 

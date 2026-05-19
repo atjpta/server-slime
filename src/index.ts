@@ -6,6 +6,7 @@ import { rooms } from "@/rooms/index.room.js";
 import { authRoutes } from "@/modules/auth/routes/auth.router.js";
 import { playerRoutes } from "@/modules/player/routes/player.router.js";
 import { battleLogRoutes } from "@/modules/battle-log/routes/battle-log.router.js";
+import { rankingRoutes } from "@/modules/ranking/routes/ranking.router.js";
 import { env } from "@/configs/env.config.js";
 // import { redisDriver } from "@/configs/redis.config.js";
 
@@ -27,6 +28,7 @@ listen(
             ...authRoutes,
             ...playerRoutes,
             ...battleLogRoutes,
+            ...rankingRoutes,
         }),
         transport: new uWebSocketsTransport({}, {}),
     }),

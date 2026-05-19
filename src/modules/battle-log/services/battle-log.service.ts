@@ -25,13 +25,16 @@ export class BattleLogService {
             logs,
             winner: winner ? new Types.ObjectId(winner) : null,
             endReason,
+            rankMode: room.state.rankMode || undefined,
         });
     }
 
     async getList(filter: BattleLogFilter) {
-        const { playerId, page, limit } = filter;
+        const { playerId, rankMode, page, limit } = filter;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const query: any = playerId ? { "players.player": new Types.ObjectId(playerId) } : {};
+        const query: any = {};
+        if (playerId) query["players.player"] = new Types.ObjectId(playerId);
+        if (rankMode) query.rankMode = rankMode;
         const skip = (page - 1) * limit;
 
         const [items, total] = await Promise.all([

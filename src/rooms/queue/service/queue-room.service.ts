@@ -11,7 +11,8 @@ export class QueueRoomService {
             allowIncompleteGroups: true,
             onGroupReady: async function (group) {
                 const withBot = group.clients.length < this.maxPlayers;
-                return matchMaker.createRoom(this.matchRoomName, { withBot });
+                const rankMode = group.clients[0]?.userData?.options?.rankMode;
+                return matchMaker.createRoom(this.matchRoomName, { withBot, rankMode });
             },
         };
     }

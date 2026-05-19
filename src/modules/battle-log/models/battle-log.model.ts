@@ -3,6 +3,7 @@ import { ScaleValueSkillSchema, Skill } from "@/modules/skills/models/skill.mode
 import { SkillType } from "@/modules/skills/enums/skill.enum.js";
 import { BattleEndReasonEnum } from "@/rooms/battle/enums/battle.enum.js";
 import { EffectBattleEnum } from "@/rooms/battle/enums/effect.enum.js";
+import { rankMode } from "@/modules/ranking/enums/ranking.enum.js";
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface EffectBattle {
@@ -33,6 +34,7 @@ export interface BattleLog extends Document {
     logs: BattleLogDetail[];
     winner: Player | null;
     endReason: BattleEndReasonEnum;
+    rankMode?: rankMode;
     createdAt: Date;
 }
 
@@ -87,6 +89,7 @@ const BattleLogSchema = new Schema<BattleLog>(
         logs: [BattleLogDetailSchema],
         winner: { type: Schema.Types.ObjectId, ref: "Player", default: null },
         endReason: { type: String, required: true, enum: Object.values(BattleEndReasonEnum) },
+        rankMode: { type: String, enum: Object.values(rankMode), default: null },
     },
     { timestamps: true }
 );

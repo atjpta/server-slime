@@ -11,6 +11,7 @@ import { Skill } from "@/modules/skills/models/skill.model.js";
 import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
 import { BattleLogDetail } from "@/modules/battle-log/models/battle-log.model.js";
 import { OnReconnectBattleCommand } from "@/rooms/battle/commands/on-reconnect.battle.command.js";
+import type { PlayerRankProfile } from "@/modules/ranking/models/player-rank-profile.model.js";
 
 export class BattleRoom extends BaseRoomPlayer {
     maxClients = 2;
@@ -24,6 +25,7 @@ export class BattleRoom extends BaseRoomPlayer {
     actions = new Map<string, number[]>();
     skills = new Map<string, Skill[]>();
     players = new Map<string, Player>();
+    rankProfiles = new Map<string, PlayerRankProfile | null>();
     logs: BattleLogDetail[] = [];
 
     messages = {
@@ -32,9 +34,10 @@ export class BattleRoom extends BaseRoomPlayer {
         },
     };
 
-    onCreate(options: { withBot?: boolean } = {}) {
+    onCreate(options: { withBot?: boolean; rankMode?: string } = {}) {
         this.state.phase = BattlePhaseEnum.WAITING;
         this.withBot = options.withBot ?? false;
+        this.state.rankMode = options.rankMode ?? "";
     }
 
     async onJoin(client: ClientRoomPlayer, options: any) {

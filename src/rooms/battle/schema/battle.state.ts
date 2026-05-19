@@ -8,4 +8,5 @@ export class BattleState extends Schema {
     @type("number") timeLeft: number = 0;
     @type({ map: BattlePlayerState }) players = new MapSchema<BattlePlayerState>();
     @type("string") winner: string = "";
+    @type("string") rankMode: string = "";
 }

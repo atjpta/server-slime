@@ -20,4 +20,5 @@ export enum BattleEndReasonEnum {
 export enum BattleEventEnum {
     BATTLE_INIT = "battle_init",
     BATTLE_LOG = "battle_log",
+    RANK_UPDATE = "rank_update",
 }
