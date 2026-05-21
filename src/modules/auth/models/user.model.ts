@@ -14,5 +14,4 @@ const UserSchema = new Schema<User>({
     password: { type: String, required: true, select: false },
     status: { type: String, enum: Object.values(UserStatus), default: UserStatus.ACTIVE },
 });
-
 export const UserModel = mongoose.model<User>("User", UserSchema);

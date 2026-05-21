@@ -45,5 +45,6 @@ PlayerRankProfileSchema.index({ player: 1, rankLadder: 1 }, { unique: true });
 
 export const PlayerRankProfileModel = mongoose.model<PlayerRankProfile>(
     "PlayerRankProfile",
-    PlayerRankProfileSchema
+    PlayerRankProfileSchema,
+    "player_rank_profiles"
 );

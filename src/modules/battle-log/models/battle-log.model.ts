@@ -94,4 +94,4 @@ const BattleLogSchema = new Schema<BattleLog>(
     { timestamps: true }
 );
 
-export const BattleLogModel = mongoose.model<BattleLog>("BattleLog", BattleLogSchema);
+export const BattleLogModel = mongoose.model<BattleLog>("BattleLog", BattleLogSchema, "battle_logs");

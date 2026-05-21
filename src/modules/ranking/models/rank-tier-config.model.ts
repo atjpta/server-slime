@@ -17,5 +17,6 @@ const RankTierConfigSchema = new Schema<RankTierConfig>(
 
 export const RankTierConfigModel = mongoose.model<RankTierConfig>(
     "RankTierConfig",
-    RankTierConfigSchema
+    RankTierConfigSchema,
+    "rank_tier_configs"
 );

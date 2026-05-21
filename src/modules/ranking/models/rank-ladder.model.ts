@@ -44,4 +44,4 @@ const RankLadderSchema = new Schema<RankLadder>(
     { timestamps: true }
 );
 
-export const RankLadderModel = mongoose.model<RankLadder>("RankLadder", RankLadderSchema);
+export const RankLadderModel = mongoose.model<RankLadder>("RankLadder", RankLadderSchema, "rank_ladders");

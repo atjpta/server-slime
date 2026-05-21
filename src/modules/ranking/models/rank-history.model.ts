@@ -40,4 +40,4 @@ const RankHistorySchema = new Schema<RankHistory>(
     { timestamps: true }
 );
 
-export const RankHistoryModel = mongoose.model<RankHistory>("RankHistory", RankHistorySchema);
+export const RankHistoryModel = mongoose.model<RankHistory>("RankHistory", RankHistorySchema, "rank_histories");
