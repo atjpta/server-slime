@@ -1,8 +1,9 @@
 import { Command } from "@colyseus/command";
 import { BattleRoom } from "@/rooms/battle/battle.room.js";
-import { BattlePhaseEnum } from "@/rooms/battle/enums/battle.enum.js";
+import { BattlePhaseEnum, BattleTimerEnum } from "@/rooms/battle/enums/battle.enum.js";
 import { ClientRoomPlayer } from "@/rooms/base/types/client-room-player.type.js";
-import { StartExecutionBattleCommand } from "@/rooms/battle/commands/start-execution.battle.command.js";
+import { PhaseExecutingBattleCommand } from "@/rooms/battle/commands/phase-executing.battle.command.js";
+import { timerService } from "@/shares/services/timer.service.js";
 
 interface Payload {
     client: ClientRoomPlayer;
@@ -26,8 +27,11 @@ export class SubmitActionsBattleCommand extends Command<BattleRoom, Payload> {
         this.room.actions.set(playerId, actions);
         this.state.players.get(playerId).ready = true;
         if (this.room.actions.size === 2) {
-            this.room.selectionTimer?.clear();
-            return new StartExecutionBattleCommand();
+            timerService.clearTimer(this.room.timers, [
+                BattleTimerEnum.SELECTION_TIMER,
+                BattleTimerEnum.SELECTION_TICKER,
+            ]);
+            return new PhaseExecutingBattleCommand();
         }
     }
 }

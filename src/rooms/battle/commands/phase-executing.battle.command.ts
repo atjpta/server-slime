@@ -2,16 +2,17 @@ import { Command } from "@colyseus/command";
 import { BattleRoom } from "@/rooms/battle/battle.room.js";
 import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
 import {
-    BattleEndReasonEnum,
     BattleEventEnum,
     BattlePhaseEnum,
+    BattleTimerEnum,
 } from "@/rooms/battle/enums/battle.enum.js";
-import { battleService } from "@/rooms/battle/services/battle.service.js";
-import { EndBattleCommand } from "@/rooms/battle/commands/end-battle.command.js";
-import { StartSelectionBattleCommand } from "@/rooms/battle/commands/start-selection.battle.command.js";
+import { battleCalcService } from "@/rooms/battle/services/battle-calc.service.js";
 import { BattleLogDetail, PlayerTurnLog } from "@/modules/battle-log/models/battle-log.model.js";
+import { timerService } from "@/shares/services/timer.service.js";
+import { PhaseSelectingBattleCommand } from "@/rooms/battle/commands/phase-selecting.battle.command.js";
+import { battleService } from "@/rooms/battle/services/battle.service.js";
 
-export class StartExecutionBattleCommand extends Command<BattleRoom> {
+export class PhaseExecutingBattleCommand extends Command<BattleRoom> {
     async execute() {
         this.state.phase = BattlePhaseEnum.EXECUTING;
         const [p1Id, p2Id] = [...this.state.players.keys()];
@@ -21,6 +22,8 @@ export class StartExecutionBattleCommand extends Command<BattleRoom> {
 
         this.state.players.get(p1Id).actions.push(...p1Actions);
         this.state.players.get(p2Id).actions.push(...p2Actions);
+
+        const waveLog: BattleLogDetail[] = [];
 
         for (let turn = 1; turn < BattleConstants.TURNS_PER_WAVE + 1; turn++) {
             const wave = this.state.wave;
@@ -38,7 +41,7 @@ export class StartExecutionBattleCommand extends Command<BattleRoom> {
             const p1Skill = this.room.skills.get(p1Id)[p1Action];
             const p2Skill = this.room.skills.get(p2Id)[p2Action];
 
-            const { p1Effects, p2Effects } = battleService.updateStats(
+            const { p1Effects, p2Effects } = battleCalcService.updateStats(
                 { skill: p1Skill, stats: p1Stats },
                 { skill: p2Skill, stats: p2Stats }
             );
@@ -48,29 +51,37 @@ export class StartExecutionBattleCommand extends Command<BattleRoom> {
                 [p2Id, { action: p2Action, damageReceive: p2Effects, stats: { ...p2Stats } }],
             ]);
             const turnLog: BattleLogDetail = { turn, wave, players };
+            waveLog.push(turnLog);
             this.room.logs.push(turnLog);
-            this.room.broadcast(BattleEventEnum.BATTLE_LOG, turnLog);
-
-            const p1Dead = battleService.isDead(p1Stats.hp);
-            const p2Dead = battleService.isDead(p2Stats.hp);
-            if (p1Dead || p2Dead) {
-                const winner = p1Dead && p2Dead ? null : p1Dead ? p2Id : p1Id;
-                const endReason =
-                    p1Dead && p2Dead ? BattleEndReasonEnum.DRAW : BattleEndReasonEnum.HP_DEPLETED;
-                return new EndBattleCommand().setPayload({ winner, endReason });
+            const result = battleCalcService.getBattleResult(players);
+            if (result) {
+                this.room.result = result;
+                break;
             }
-            await this.delay(BattleConstants.TURN_ANIMATION_MS);
         }
+        this.room.broadcast(BattleEventEnum.BATTLE_LOG, waveLog);
+
         if (this.state.wave >= BattleConstants.MAX_WAVE) {
-            const lastLog = this.room.logs[this.room.logs.length - 1];
-            const p1Hp = lastLog.players.get(p1Id).stats.hp;
-            const p2Hp = lastLog.players.get(p2Id).stats.hp;
-            const winner = p1Hp === p2Hp ? "draw" : p1Hp > p2Hp ? p1Id : p2Id;
-            return new EndBattleCommand().setPayload({
-                winner,
-                endReason: BattleEndReasonEnum.MAX_WAVES,
-            });
+            this.room.result = battleCalcService.getBattleResult(
+                this.room.logs[this.room.logs.length - 1].players,
+                this.state.wave,
+                BattleConstants.MAX_WAVE
+            );
         }
-        return new StartSelectionBattleCommand();
+
+        timerService.setTimer(
+            this.room.timers,
+            this.room.clock,
+            BattleTimerEnum.EXECUTING_DONE_TIMER,
+            BattleConstants.EXECUTING_DONE_TIMEOUT_MS,
+            () => {
+                this.room.dispatcher.dispatch(
+                    battleService.nextOrEndPhaseCommand(
+                        this.room,
+                        new PhaseSelectingBattleCommand()
+                    )
+                );
+            }
+        );
     }
 }

@@ -1,27 +1,22 @@
 import { RankLadderStatus, RuleSet } from "@/modules/ranking/models/rank-ladder.model.js";
 import { RankLadderModel } from "@/modules/ranking/models/rank-ladder.model.js";
 import type { rankMode } from "@/modules/ranking/enums/ranking.enum.js";
-import { PlayerRankProfileModel } from "@/modules/ranking/models/player-rank-profile.model.js";
+import {
+    PlayerRankProfile,
+    PlayerRankProfileModel,
+} from "@/modules/ranking/models/player-rank-profile.model.js";
 import { RankTierConfigModel } from "@/modules/ranking/models/rank-tier-config.model.js";
-import { Types } from "mongoose";
+import { QueryFilter, Types } from "mongoose";
 
 export class PlayerRankProfileService {
-    async getPlayerRankProfiles(playerId: Types.ObjectId, rankModeFilter?: string) {
-        const query: Record<string, unknown> = { player: playerId };
-        if (rankModeFilter) query.rankMode = rankModeFilter;
+    async getPlayerRankProfiles(playerId: Types.ObjectId, rankMode?: string) {
+        const query: QueryFilter<PlayerRankProfile> = { player: playerId };
+        if (rankMode) query.rankMode = rankMode;
         return PlayerRankProfileModel.find(query)
             .populate("tier")
             .populate("highestTier")
             .lean()
             .transform((docs) => JSON.parse(JSON.stringify(docs)));
-    }
-
-    async getByPlayerAndRankMode(playerId: Types.ObjectId, rankModeValue: string) {
-        return PlayerRankProfileModel.findOne({ player: playerId, rankMode: rankModeValue })
-            .populate("tier")
-            .populate("highestTier")
-            .lean()
-            .transform((doc) => (doc ? JSON.parse(JSON.stringify(doc)) : null));
     }
 
     async getPlayerRankPosition(playerId: Types.ObjectId, rankModeValue: string) {

@@ -1,14 +1,12 @@
 import { Command } from "@colyseus/command";
 import { BattleRoom } from "@/rooms/battle/battle.room.js";
 import { playerService } from "@/modules/player/services/player.service.js";
-import { StartSelectionBattleCommand } from "@/rooms/battle/commands/start-selection.battle.command.js";
-import { BattlePlayerState } from "@/rooms/battle/schema/player.battle.state.js";
+import { PhaseSelectingBattleCommand } from "@/rooms/battle/commands/phase-selecting.battle.command.js";
 import { battleService } from "@/rooms/battle/services/battle.service.js";
 import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
 import { ClientRoomPlayer } from "@/rooms/base/types/client-room-player.type.js";
 import { BattlePhaseEnum } from "@/rooms/battle/enums/battle.enum.js";
 import { OnReconnectBattleCommand } from "@/rooms/battle/commands/on-reconnect.battle.command.js";
-import { PlayerTurnLog } from "@/modules/battle-log/models/battle-log.model.js";
 import { OnBotJoinBattleCommand } from "@/rooms/battle/commands/on-bot-join.battle.command.js";
 import { playerRankProfileService } from "@/modules/ranking/services/player-rank-profile.service.js";
 import { Types } from "mongoose";
@@ -28,33 +26,23 @@ export class OnJoinBattleCommand extends Command<BattleRoom, Payload> {
         const [p, rankProfile] = await Promise.all([
             playerService.getById(playerId),
             rankMode
-                ? playerRankProfileService.getByPlayerAndRankMode(new Types.ObjectId(playerId), rankMode)
+                ? playerRankProfileService
+                      .getPlayerRankProfiles(new Types.ObjectId(playerId), rankMode)
+                      .then((docs) => docs[0] ?? null)
                 : Promise.resolve(null),
         ]);
-        this.state.players.set(playerId, BattlePlayerState.from(p));
-        this.room.players.set(playerId, p);
-        this.room.skills.set(playerId, battleService.genSkillArray(p.skills));
-        this.room.rankProfiles.set(playerId, rankProfile);
+        battleService.registerPlayer(this.room, playerId, p, rankProfile);
 
         if (this.state.players.size === 1 && this.room.withBot) {
-            this.room.dispatcher.dispatch(new OnBotJoinBattleCommand());
+            return new OnBotJoinBattleCommand();
         }
 
         if (this.state.players.size === 2) {
-            const initialPlayers = new Map<string, PlayerTurnLog>();
-            this.room.players.forEach((player, pId) => {
-                initialPlayers.set(pId, {
-                    action: 0,
-                    damageReceive: [],
-                    stats: { ...player.stats },
-                });
-            });
-            this.room.logs.push({ turn: 0, wave: 0, players: initialPlayers });
+            battleService.initBattleLogs(this.room);
             this.room.clients.forEach((client) => {
                 this.room.dispatcher.dispatch(new OnReconnectBattleCommand(), { client });
             });
-            await this.delay(BattleConstants.TURN_ANIMATION_MS);
-            return new StartSelectionBattleCommand();
+            return new PhaseSelectingBattleCommand();
         }
     }
 }
