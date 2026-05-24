@@ -1,9 +1,7 @@
 import { Command } from "@colyseus/command";
 import { BattleRoom } from "@/rooms/battle/battle.room.js";
 import { playerService } from "@/modules/player/services/player.service.js";
-import { PhaseSelectingBattleCommand } from "@/rooms/battle/commands/phase-selecting.battle.command.js";
 import { battleService } from "@/rooms/battle/services/battle.service.js";
-import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
 import { ClientRoomPlayer } from "@/rooms/base/types/client-room-player.type.js";
 import { BattlePhaseEnum } from "@/rooms/battle/enums/battle.enum.js";
 import { OnReconnectBattleCommand } from "@/rooms/battle/commands/on-reconnect.battle.command.js";
@@ -42,7 +40,7 @@ export class OnJoinBattleCommand extends Command<BattleRoom, Payload> {
             this.room.clients.forEach((client) => {
                 this.room.dispatcher.dispatch(new OnReconnectBattleCommand(), { client });
             });
-            return new PhaseSelectingBattleCommand();
+            return battleService.nextSelectingCommand(this.state.wave);
         }
     }
 }

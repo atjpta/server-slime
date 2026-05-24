@@ -7,23 +7,33 @@ import {
     BattleTimerEnum,
 } from "@/rooms/battle/enums/battle.enum.js";
 import { battleCalcService } from "@/rooms/battle/services/battle-calc.service.js";
+import { battleItemEffectService } from "@/rooms/battle/services/battle-item-effect.service.js";
 import { BattleLogDetail, PlayerTurnLog } from "@/modules/battle-log/models/battle-log.model.js";
 import { timerService } from "@/shares/services/timer.service.js";
-import { PhaseSelectingBattleCommand } from "@/rooms/battle/commands/phase-selecting.battle.command.js";
 import { battleService } from "@/rooms/battle/services/battle.service.js";
 
 export class PhaseExecutingBattleCommand extends Command<BattleRoom> {
     async execute() {
         this.state.phase = BattlePhaseEnum.EXECUTING;
-        const [p1Id, p2Id] = [...this.state.players.keys()];
 
+        const [p1Id, p2Id] = [...this.state.players.keys()];
+        const wave = this.state.wave;
         const p1Actions = this.room.actions.get(p1Id);
         const p2Actions = this.room.actions.get(p2Id);
 
-        this.state.players.get(p1Id).actions.push(...p1Actions);
-        this.state.players.get(p2Id).actions.push(...p2Actions);
+        this.state.players.forEach((p) => {
+            p.ready = false;
+            p.actions.clear();
+            p.actions.push(...this.room.actions.get(p.playerId));
+        });
 
         const waveLog: BattleLogDetail[] = [];
+
+        const turn0Log = battleItemEffectService.applyItemEffects(this.room, [p1Id, p2Id], wave);
+        if (turn0Log) {
+            waveLog.push(turn0Log);
+            this.room.logs.push(turn0Log);
+        }
 
         for (let turn = 1; turn < BattleConstants.TURNS_PER_WAVE + 1; turn++) {
             const wave = this.state.wave;
@@ -41,14 +51,54 @@ export class PhaseExecutingBattleCommand extends Command<BattleRoom> {
             const p1Skill = this.room.skills.get(p1Id)[p1Action];
             const p2Skill = this.room.skills.get(p2Id)[p2Action];
 
+            const p1Buff = this.room.waveDamageBuff.get(p1Id);
+            const p2Buff = this.room.waveDamageBuff.get(p2Id);
             const { p1Effects, p2Effects } = battleCalcService.updateStats(
-                { skill: p1Skill, stats: p1Stats },
-                { skill: p2Skill, stats: p2Stats }
+                {
+                    skill: p1Skill,
+                    stats: p1Stats,
+                    damageBuff: p1Buff?.turnIndex === turn - 1 ? p1Buff.scale : undefined,
+                },
+                {
+                    skill: p2Skill,
+                    stats: p2Stats,
+                    damageBuff: p2Buff?.turnIndex === turn - 1 ? p2Buff.scale : undefined,
+                }
             );
 
             const players = new Map<string, PlayerTurnLog>([
-                [p1Id, { action: p1Action, damageReceive: p1Effects, stats: { ...p1Stats } }],
-                [p2Id, { action: p2Action, damageReceive: p2Effects, stats: { ...p2Stats } }],
+                [
+                    p1Id,
+                    {
+                        action: p1Action,
+                        damageReceive: p1Effects,
+                        stats: { ...p1Stats },
+                        itemUsed:
+                            p1Buff?.turnIndex === turn - 1
+                                ? {
+                                      code: p1Buff.itemCode,
+                                      applyTurnIndex: turn - 1,
+                                      rule: p1Buff.itemRule,
+                                  }
+                                : undefined,
+                    },
+                ],
+                [
+                    p2Id,
+                    {
+                        action: p2Action,
+                        damageReceive: p2Effects,
+                        stats: { ...p2Stats },
+                        itemUsed:
+                            p2Buff?.turnIndex === turn - 1
+                                ? {
+                                      code: p2Buff.itemCode,
+                                      applyTurnIndex: turn - 1,
+                                      rule: p2Buff.itemRule,
+                                  }
+                                : undefined,
+                    },
+                ],
             ]);
             const turnLog: BattleLogDetail = { turn, wave, players };
             waveLog.push(turnLog);
@@ -64,7 +114,7 @@ export class PhaseExecutingBattleCommand extends Command<BattleRoom> {
         if (this.state.wave >= BattleConstants.MAX_WAVE) {
             this.room.result = battleCalcService.getBattleResult(
                 this.room.logs[this.room.logs.length - 1].players,
-                this.state.wave,
+                wave,
                 BattleConstants.MAX_WAVE
             );
         }
@@ -78,7 +128,7 @@ export class PhaseExecutingBattleCommand extends Command<BattleRoom> {
                 this.room.dispatcher.dispatch(
                     battleService.nextOrEndPhaseCommand(
                         this.room,
-                        new PhaseSelectingBattleCommand()
+                        battleService.nextSelectingCommand(wave)
                     )
                 );
             }

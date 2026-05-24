@@ -12,4 +12,5 @@ export interface InitLogsRoom {
 export interface UpdateStatsBattle {
     skill: Skill;
     stats: PlayerStats;
+    damageBuff?: number;
 }

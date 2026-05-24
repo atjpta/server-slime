@@ -3,4 +3,5 @@ export enum EffectBattleEnum {
     DEFENSE = "defense",
     SPELL = "spell",
     PARRY = "parry",
+    HEAL = "heal",
 }

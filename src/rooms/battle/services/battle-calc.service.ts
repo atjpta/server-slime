@@ -32,8 +32,8 @@ export class BattleCalcService {
         const skillP1 = p1.skill;
         const skillP2 = p2.skill;
 
-        const dmgP1 = this.calculateDamage(p1);
-        const dmgP2 = this.calculateDamage(p2);
+        const dmgP1 = this.calculateDamage(p1) * (p1.damageBuff ?? 1);
+        const dmgP2 = this.calculateDamage(p2) * (p2.damageBuff ?? 1);
 
         const statsP1 = p1.stats;
         const statsP2 = p2.stats;
@@ -60,13 +60,23 @@ export class BattleCalcService {
                 applyDmg(p2Effects, statsP2, EffectBattleEnum.ATTACK, dmgP1);
                 break;
             case this.genKeyMapCounter([SkillType.ATTACK, SkillType.DEFENSE]):
-                applyDmg(p1Effects, statsP1, EffectBattleEnum.PARRY, this.calculateDamageParry(skillP2, dmgP1));
+                applyDmg(
+                    p1Effects,
+                    statsP1,
+                    EffectBattleEnum.PARRY,
+                    this.calculateDamageParry(skillP2, dmgP1)
+                );
                 break;
             case this.genKeyMapCounter([SkillType.ATTACK, SkillType.SPELL]):
                 applyDmg(p2Effects, statsP2, EffectBattleEnum.ATTACK, dmgP1);
                 break;
             case this.genKeyMapCounter([SkillType.DEFENSE, SkillType.ATTACK]):
-                applyDmg(p2Effects, statsP2, EffectBattleEnum.PARRY, this.calculateDamageParry(skillP1, dmgP2));
+                applyDmg(
+                    p2Effects,
+                    statsP2,
+                    EffectBattleEnum.PARRY,
+                    this.calculateDamageParry(skillP1, dmgP2)
+                );
                 break;
             case this.genKeyMapCounter([SkillType.DEFENSE, SkillType.DEFENSE]):
                 applyDmg(p1Effects, statsP1, EffectBattleEnum.DEFENSE, dmgP2);
@@ -114,7 +124,8 @@ export class BattleCalcService {
         if (p1Dead || p2Dead) {
             return {
                 winner: p1Dead && p2Dead ? null : p1Dead ? p2Id : p1Id,
-                endReason: p1Dead && p2Dead ? BattleEndReasonEnum.DRAW : BattleEndReasonEnum.HP_DEPLETED,
+                endReason:
+                    p1Dead && p2Dead ? BattleEndReasonEnum.DRAW : BattleEndReasonEnum.HP_DEPLETED,
             };
         }
 

@@ -5,15 +5,15 @@ import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
 import { battleService } from "@/rooms/battle/services/battle.service.js";
 import { timerService } from "@/shares/services/timer.service.js";
 import { BattleRoom } from "@/rooms/battle/battle.room.js";
-
 export class PhaseSelectingBattleCommand extends Command<BattleRoom> {
     execute() {
         this.state.phase = BattlePhaseEnum.SELECTING;
         this.state.wave += 1;
         this.room.actions.clear();
+        this.room.selectedItems.clear();
+        this.room.waveDamageBuff.clear();
         this.state.players.forEach((p) => {
             p.ready = false;
-            p.executingDone = false;
             p.actions.clear();
         });
 
@@ -26,6 +26,7 @@ export class PhaseSelectingBattleCommand extends Command<BattleRoom> {
         );
 
         if (this.room.botPlayerId) {
+            battleService.assignBotItem(this.room, this.room.botPlayerId, this.state.wave);
             battleService.assignRandomAction(this.room, this.room.botPlayerId, this.state.wave);
         }
 

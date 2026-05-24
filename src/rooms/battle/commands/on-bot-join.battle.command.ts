@@ -32,6 +32,6 @@ export class OnBotJoinBattleCommand extends Command<BattleRoom> {
             this.room.dispatcher.dispatch(new OnReconnectBattleCommand(), { client });
         });
 
-        return new PhaseSelectingBattleCommand();
+        return battleService.nextSelectingCommand(this.state.wave);
     }
 }

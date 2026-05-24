@@ -3,35 +3,46 @@ import { BattleRoom } from "@/rooms/battle/battle.room.js";
 import { BattlePhaseEnum, BattleTimerEnum } from "@/rooms/battle/enums/battle.enum.js";
 import { ClientRoomPlayer } from "@/rooms/base/types/client-room-player.type.js";
 import { PhaseExecutingBattleCommand } from "@/rooms/battle/commands/phase-executing.battle.command.js";
-import { timerService } from "@/shares/services/timer.service.js";
+import { battleService } from "@/rooms/battle/services/battle.service.js";
+import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
 
 interface Payload {
     client: ClientRoomPlayer;
     actions: number[];
+    itemIndex?: number;
+    itemApplyIndex?: number;
 }
 
 export class SubmitActionsBattleCommand extends Command<BattleRoom, Payload> {
-    validate({ client, actions }: Payload) {
-        const maxLengthSkill = this.room.skills.get(client.auth.playerId.toString()).length;
-
-        for (const action of actions) {
-            if (action >= maxLengthSkill) {
-                return false;
-            }
+    validate({ client, actions, itemIndex, itemApplyIndex }: Payload) {
+        const playerId = client.auth.playerId.toString();
+        if (!battleService.canSubmit(this.room, playerId, BattlePhaseEnum.SELECTING)) {
+            return false;
         }
-        return this.state.phase === BattlePhaseEnum.SELECTING;
+        const maxLengthSkill = this.room.skills.get(playerId).length;
+        if (!actions.every((action) => action < maxLengthSkill)) return false;
+        const player = this.state.players.get(playerId)!;
+        if (itemIndex !== undefined && !(itemIndex >= 0 && itemIndex < player.items.length))
+            return false;
+        if (
+            itemApplyIndex !== undefined &&
+            !(itemApplyIndex >= 0 && itemApplyIndex < BattleConstants.TURNS_PER_WAVE - 1)
+        )
+            return false;
+        return true;
     }
 
-    execute({ client, actions }: Payload) {
+    execute({ client, actions, itemIndex, itemApplyIndex }: Payload) {
         const playerId = client.auth.playerId.toString();
         this.room.actions.set(playerId, actions);
-        this.state.players.get(playerId).ready = true;
-        if (this.room.actions.size === 2) {
-            timerService.clearTimer(this.room.timers, [
-                BattleTimerEnum.SELECTION_TIMER,
-                BattleTimerEnum.SELECTION_TICKER,
-            ]);
-            return new PhaseExecutingBattleCommand();
+        if (itemIndex !== undefined || itemApplyIndex !== undefined) {
+            this.room.selectedItems.set(playerId, { itemIndex, itemApplyIndex });
         }
+        this.state.players.get(playerId).ready = true;
+        return battleService.ifAllReadyAdvance(
+            this.room,
+            [BattleTimerEnum.SELECTION_TIMER, BattleTimerEnum.SELECTION_TICKER],
+            new PhaseExecutingBattleCommand()
+        );
     }
 }

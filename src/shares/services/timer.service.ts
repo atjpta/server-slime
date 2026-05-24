@@ -5,20 +5,21 @@ type Clock = {
 };
 
 export class TimerService {
-    startCountdownTicker(
+    startCountdownTicker<T extends object, K extends keyof T>(
         timers: TimerMap,
         clock: Clock,
         key: string,
         durationMs: number,
-        target: { timeLeft: number }
+        target: T,
+        field: K = "timeLeft" as K
     ) {
         this.clearTimer(timers, key);
-        target.timeLeft = durationMs / 1000;
+        (target[field] as number) = durationMs / 1000;
         timers.set(
             key,
             clock.setInterval(() => {
-                target.timeLeft -= 1;
-                if (target.timeLeft <= 0) {
+                (target[field] as number) -= 1;
+                if ((target[field] as number) <= 0) {
                     this.clearTimer(timers, key);
                 }
             }, 1000)

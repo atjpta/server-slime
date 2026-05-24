@@ -2,6 +2,7 @@ import { CloseCode } from "colyseus";
 import { Dispatcher } from "@colyseus/command";
 import { BaseRoomPlayer } from "@/rooms/base/base.room.js";
 import { BattleEndReasonEnum, BattlePhaseEnum } from "@/rooms/battle/enums/battle.enum.js";
+import { BattleItemRule } from "@/modules/item/models/battle-item.model.js";
 import { ClientRoomPlayer } from "@/rooms/base/types/client-room-player.type.js";
 import { OnJoinBattleCommand } from "@/rooms/battle/commands/on-join.battle.command.js";
 import { SubmitActionsBattleCommand } from "@/rooms/battle/commands/submit-actions.battle.command.js";
@@ -16,6 +17,7 @@ import { OnLeaveBattleCommand } from "@/rooms/battle/commands/on-leave.battle.co
 import type { PlayerRankProfile } from "@/modules/ranking/models/player-rank-profile.model.js";
 import { timerService } from "@/shares/services/timer.service.js";
 import { SubmitExecutingDoneBattleCommand } from "@/rooms/battle/commands/submit-executing-done.battle.command.js";
+import { SubmitSelectItemBattleCommand } from "@/rooms/battle/commands/submit-select-item.battle.command.js";
 
 export class BattleRoom extends BaseRoomPlayer {
     maxClients = 2;
@@ -26,6 +28,8 @@ export class BattleRoom extends BaseRoomPlayer {
     withBot: boolean = false;
 
     actions = new Map<string, number[]>();
+    selectedItems = new Map<string, { itemIndex?: number; itemApplyIndex?: number }>();
+    waveDamageBuff = new Map<string, { turnIndex: number; scale: number; itemCode: string; itemRule: BattleItemRule }>();
     skills = new Map<string, Skill[]>();
     players = new Map<string, Player>();
     rankProfiles = new Map<string, PlayerRankProfile | null>();
@@ -36,11 +40,20 @@ export class BattleRoom extends BaseRoomPlayer {
     };
 
     messages = {
-        [BattleEventEnum.SUBMIT_ACTIONS_BATTLE]: (client: ClientRoomPlayer, actions: number[]) => {
-            this.dispatcher.dispatch(new SubmitActionsBattleCommand(), { client, actions });
+        [BattleEventEnum.SUBMIT_ACTIONS_BATTLE]: (
+            client: ClientRoomPlayer,
+            { actions, itemIndex, itemApplyIndex }: { actions: number[]; itemIndex?: number; itemApplyIndex?: number }
+        ) => {
+            this.dispatcher.dispatch(new SubmitActionsBattleCommand(), { client, actions, itemIndex, itemApplyIndex });
         },
         [BattleEventEnum.SUBMIT_EXECUTING_DONE]: (client: ClientRoomPlayer) => {
             this.dispatcher.dispatch(new SubmitExecutingDoneBattleCommand(), { client });
+        },
+        [BattleEventEnum.SUBMIT_SELECT_ITEM]: (
+            client: ClientRoomPlayer,
+            { itemIndex, swapIndex }: { itemIndex: number; swapIndex?: number }
+        ) => {
+            this.dispatcher.dispatch(new SubmitSelectItemBattleCommand(), { client, itemIndex, swapIndex });
         },
     };
 

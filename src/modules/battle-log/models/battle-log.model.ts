@@ -1,4 +1,5 @@
 import { Player, PlayerStats, PlayerStatsSchema } from "@/modules/player/models/player.model.js";
+import { BattleItemRule } from "@/modules/item/models/battle-item.model.js";
 import { ScaleValueSkillSchema, Skill } from "@/modules/skills/models/skill.model.js";
 import { SkillType } from "@/modules/skills/enums/skill.enum.js";
 import { BattleEndReasonEnum } from "@/rooms/battle/enums/battle.enum.js";
@@ -17,10 +18,17 @@ export interface BattlePlayerLog {
     skills: Skill[];
 }
 
+export interface ItemUsedLog {
+    code: string;
+    applyTurnIndex?: number;
+    rule?: BattleItemRule;
+}
+
 export interface PlayerTurnLog {
     action: number;
     damageReceive: EffectBattle[];
     stats: PlayerStats;
+    itemUsed?: ItemUsedLog;
 }
 
 export interface BattleLogDetail {
@@ -46,11 +54,21 @@ const EffectBattleSchema = new Schema<EffectBattle>(
     { _id: false }
 );
 
+const ItemUsedLogSchema = new Schema<ItemUsedLog>(
+    {
+        code: { type: String, required: true },
+        applyTurnIndex: { type: Number },
+        rule: { type: Schema.Types.Mixed },
+    },
+    { _id: false }
+);
+
 const PlayerTurnLogSchema = new Schema<PlayerTurnLog>(
     {
         action: { type: Number, required: true },
         damageReceive: [EffectBattleSchema],
         stats: { type: PlayerStatsSchema, required: true },
+        itemUsed: { type: ItemUsedLogSchema },
     },
     { _id: false }
 );
