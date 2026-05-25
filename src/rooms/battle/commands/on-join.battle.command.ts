@@ -2,16 +2,15 @@ import { Command } from "@colyseus/command";
 import { BattleRoom } from "@/rooms/battle/battle.room.js";
 import { playerService } from "@/modules/player/services/player.service.js";
 import { battleService } from "@/rooms/battle/services/battle.service.js";
-import { ClientRoomPlayer } from "@/rooms/base/types/client-room-player.type.js";
 import { BattlePhaseEnum } from "@/rooms/battle/enums/battle.enum.js";
 import { OnReconnectBattleCommand } from "@/rooms/battle/commands/on-reconnect.battle.command.js";
-import { OnBotJoinBattleCommand } from "@/rooms/battle/commands/on-bot-join.battle.command.js";
 import { playerRankProfileService } from "@/modules/ranking/services/player-rank-profile.service.js";
 import { Types } from "mongoose";
+import { BattlePlayerState } from "@/rooms/battle/schema/player.battle.state.js";
+import { battleBotService } from "@/rooms/battle/services/battle-bot.service.js";
 
 interface Payload {
     playerId: string;
-    client: ClientRoomPlayer;
 }
 
 export class OnJoinBattleCommand extends Command<BattleRoom, Payload> {
@@ -29,10 +28,13 @@ export class OnJoinBattleCommand extends Command<BattleRoom, Payload> {
                       .then((docs) => docs[0] ?? null)
                 : Promise.resolve(null),
         ]);
-        battleService.registerPlayer(this.room, playerId, p, rankProfile);
+        this.room.state.players.set(playerId, BattlePlayerState.from(p));
+        this.room.players.set(playerId, p);
+        this.room.skills.set(playerId, battleService.genSkillArray(p.skills));
+        this.room.rankProfiles.set(playerId, rankProfile);
 
         if (this.state.players.size === 1 && this.room.withBot) {
-            return new OnBotJoinBattleCommand();
+            return battleBotService.onJoin(this.room);
         }
 
         if (this.state.players.size === 2) {

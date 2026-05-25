@@ -1,47 +1,28 @@
 import { Command } from "@colyseus/command";
 import { BattleRoom } from "@/rooms/battle/battle.room.js";
 import { BattlePhaseEnum, BattleTimerEnum } from "@/rooms/battle/enums/battle.enum.js";
-import { ClientRoomPlayer } from "@/rooms/base/types/client-room-player.type.js";
-import { timerService } from "@/shares/services/timer.service.js";
 import { battleService } from "@/rooms/battle/services/battle.service.js";
 
 interface Payload {
-    client: ClientRoomPlayer;
+    playerId: string;
 }
 
 export class SubmitExecutingDoneBattleCommand extends Command<BattleRoom, Payload> {
-    validate({ client }: Payload) {
-        return battleService.canSubmit(
-            this.room,
-            client.auth.playerId.toString(),
-            BattlePhaseEnum.EXECUTING
-        );
+    validate({ playerId }: Payload) {
+        return battleService.canSubmit(this.room, playerId, BattlePhaseEnum.EXECUTING);
     }
 
-    execute({ client }: Payload) {
-        const playerId = client.auth.playerId.toString();
+    execute({ playerId }: Payload) {
         const playerState = this.state.players.get(playerId)!;
         playerState.ready = true;
 
-        if (this.room.withBot) {
-            return this.nextCommand();
-        }
-
-        let allDone = true;
-        this.state.players.forEach((p) => {
-            if (!p.ready) allDone = false;
-        });
-
-        if (allDone) {
-            return this.nextCommand();
-        }
-    }
-
-    private nextCommand() {
-        timerService.clearTimer(this.room.timers, BattleTimerEnum.EXECUTING_DONE_TIMER);
-        return battleService.nextOrEndPhaseCommand(
+        return battleService.ifAllReadyAdvance(
             this.room,
-            battleService.nextSelectingCommand(this.state.wave)
+            [BattleTimerEnum.EXECUTING_DONE_TIMER],
+            battleService.nextOrEndPhaseCommand(
+                this.room,
+                battleService.nextSelectingCommand(this.state.wave)
+            )
         );
     }
 }

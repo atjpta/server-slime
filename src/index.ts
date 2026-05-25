@@ -2,18 +2,20 @@ import { listen } from "@colyseus/tools";
 import { connectMongoDB } from "@/configs/mongo.config.js";
 import { createEndpoint, createRouter, defineServer, monitor, playground } from "colyseus";
 import { uWebSocketsTransport } from "@colyseus/uwebsockets-transport";
-import { rooms } from "@/rooms/index.room.js";
+import { createRooms } from "@/rooms/index.room.js";
 import { authRoutes } from "@/modules/auth/routes/auth.router.js";
 import { playerRoutes } from "@/modules/player/routes/player.router.js";
 import { battleLogRoutes } from "@/modules/battle-log/routes/battle-log.router.js";
 import { rankingRoutes } from "@/modules/ranking/routes/ranking.router.js";
+import { masterDataRoutes } from "@/modules/master-data/routes/master-data.router.js";
 import { env } from "@/configs/env.config.js";
 // import { redisDriver } from "@/configs/redis.config.js";
 
 connectMongoDB();
+
 listen(
     defineServer({
-        rooms,
+        rooms: createRooms(),
         // driver: redisDriver,
         express: (app) => {
             app.use("/monitor", monitor());
@@ -29,6 +31,7 @@ listen(
             ...playerRoutes,
             ...battleLogRoutes,
             ...rankingRoutes,
+            ...masterDataRoutes,
         }),
         transport: new uWebSocketsTransport({}, {}),
     }),

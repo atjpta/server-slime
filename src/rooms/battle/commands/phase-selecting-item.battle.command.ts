@@ -4,9 +4,9 @@ import { BattleRoom } from "@/rooms/battle/battle.room.js";
 import { battleItemService } from "@/modules/item/services/battle-item.service.js";
 import { BattleItemState } from "@/rooms/battle/schema/battle-item.state.js";
 import { timerService } from "@/shares/services/timer.service.js";
-import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
 import { PhaseSelectingBattleCommand } from "@/rooms/battle/commands/phase-selecting.battle.command.js";
 import { battleService } from "@/rooms/battle/services/battle.service.js";
+import { battleBotService } from "@/rooms/battle/services/battle-bot.service.js";
 
 export class PhaseSelectingItemBattleCommand extends Command<BattleRoom> {
     async execute() {
@@ -18,23 +18,19 @@ export class PhaseSelectingItemBattleCommand extends Command<BattleRoom> {
         const items = await battleItemService.getRandomItems(3, seed);
         this.state.items.push(...BattleItemState.fromArray(items));
 
+        battleBotService.submitSelectItem(this.room);
         timerService.startCountdownTicker(
             this.room.timers,
             this.clock,
             BattleTimerEnum.SELECTION_ITEM_TICKER,
-            BattleConstants.SELECTION_ITEM_TIME_MS,
+            this.room.config.selectionItemTimeMs,
             this.state
         );
-
-        if (this.room.botPlayerId) {
-            battleService.assignRandomItem(this.room, this.room.botPlayerId);
-        }
-
         timerService.setTimer(
             this.room.timers,
             this.clock,
             BattleTimerEnum.SELECTION_ITEM_TIMER,
-            BattleConstants.SELECTION_ITEM_TIME_OUT_MS,
+            this.room.config.selectionItemTimeOutMs,
             () => {
                 timerService.clearTimer(this.room.timers, BattleTimerEnum.SELECTION_ITEM_TICKER);
                 for (const [pId] of this.state.players) {

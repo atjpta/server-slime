@@ -9,8 +9,10 @@ import { SubmitActionsBattleCommand } from "@/rooms/battle/commands/submit-actio
 import { BattleState } from "@/rooms/battle/schema/battle.state.js";
 import { Player } from "@/modules/player/models/player.model.js";
 import { Skill } from "@/modules/skills/models/skill.model.js";
-import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
 import { BattleLogDetail } from "@/modules/battle-log/models/battle-log.model.js";
+import { masterDataService } from "@/modules/master-data/services/master-data.service.js";
+import { MasterDataKey } from "@/modules/master-data/enums/master-data.enum.js";
+import { BattleConfigValue } from "@/modules/master-data/models/master-data.model.js";
 import { BattleEventEnum } from "@/rooms/battle/enums/battle.enum.js";
 import { OnReconnectBattleCommand } from "@/rooms/battle/commands/on-reconnect.battle.command.js";
 import { OnLeaveBattleCommand } from "@/rooms/battle/commands/on-leave.battle.command.js";
@@ -24,12 +26,16 @@ export class BattleRoom extends BaseRoomPlayer {
     state = new BattleState();
     dispatcher = new Dispatcher(this);
     timers = new Map<string, ReturnType<typeof this.clock.setTimeout>>();
+    config: BattleConfigValue;
     botPlayerId: string | null = null;
     withBot: boolean = false;
 
     actions = new Map<string, number[]>();
     selectedItems = new Map<string, { itemIndex?: number; itemApplyIndex?: number }>();
-    waveDamageBuff = new Map<string, { turnIndex: number; scale: number; itemCode: string; itemRule: BattleItemRule }>();
+    waveDamageBuff = new Map<
+        string,
+        { turnIndex: number; scale: number; itemCode: string; itemRule: BattleItemRule }
+    >();
     skills = new Map<string, Skill[]>();
     players = new Map<string, Player>();
     rankProfiles = new Map<string, PlayerRankProfile | null>();
@@ -42,22 +48,42 @@ export class BattleRoom extends BaseRoomPlayer {
     messages = {
         [BattleEventEnum.SUBMIT_ACTIONS_BATTLE]: (
             client: ClientRoomPlayer,
-            { actions, itemIndex, itemApplyIndex }: { actions: number[]; itemIndex?: number; itemApplyIndex?: number }
+            {
+                actions,
+                itemIndex,
+                itemApplyIndex,
+            }: { actions: number[]; itemIndex?: number; itemApplyIndex?: number }
         ) => {
-            this.dispatcher.dispatch(new SubmitActionsBattleCommand(), { client, actions, itemIndex, itemApplyIndex });
+            const playerId = client.auth.playerId.toString();
+            this.dispatcher.dispatch(new SubmitActionsBattleCommand(), {
+                playerId,
+                actions,
+                itemIndex,
+                itemApplyIndex,
+            });
         },
         [BattleEventEnum.SUBMIT_EXECUTING_DONE]: (client: ClientRoomPlayer) => {
-            this.dispatcher.dispatch(new SubmitExecutingDoneBattleCommand(), { client });
+            const playerId = client.auth.playerId.toString();
+            this.dispatcher.dispatch(new SubmitExecutingDoneBattleCommand(), { playerId });
         },
         [BattleEventEnum.SUBMIT_SELECT_ITEM]: (
             client: ClientRoomPlayer,
             { itemIndex, swapIndex }: { itemIndex: number; swapIndex?: number }
         ) => {
-            this.dispatcher.dispatch(new SubmitSelectItemBattleCommand(), { client, itemIndex, swapIndex });
+            const playerId = client.auth.playerId.toString();
+            this.dispatcher.dispatch(new SubmitSelectItemBattleCommand(), {
+                playerId,
+                itemIndex,
+                swapIndex,
+            });
         },
     };
 
-    onCreate(options: { withBot?: boolean; rankMode?: string } = {}) {
+    async onCreate(options: { withBot?: boolean; rankMode?: string } = {}) {
+        const masterData = await masterDataService.getByKey(MasterDataKey.BATTLE_CONFIG);
+        if (!masterData) throw new Error("BATTLE_CONFIG master data not found");
+        this.config = masterData.value as BattleConfigValue;
+
         this.state.phase = BattlePhaseEnum.WAITING;
         this.withBot = options.withBot ?? false;
         this.state.rankMode = options.rankMode ?? "";
@@ -65,7 +91,7 @@ export class BattleRoom extends BaseRoomPlayer {
 
     async onJoin(client: ClientRoomPlayer, options: any) {
         const playerId = client.auth.playerId.toString();
-        this.dispatcher.dispatch(new OnJoinBattleCommand(), { playerId, client });
+        this.dispatcher.dispatch(new OnJoinBattleCommand(), { playerId });
     }
 
     async onLeave(client: ClientRoomPlayer, _code: CloseCode) {
@@ -74,7 +100,7 @@ export class BattleRoom extends BaseRoomPlayer {
 
     async onDrop(client: ClientRoomPlayer, code: CloseCode) {
         if (this.state.phase !== BattlePhaseEnum.ENDED) {
-            await this.allowReconnection(client, BattleConstants.RECONNECTION_S);
+            await this.allowReconnection(client, this.config.reconnectionS);
         }
     }
 

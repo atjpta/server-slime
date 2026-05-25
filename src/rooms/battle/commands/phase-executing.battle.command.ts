@@ -1,6 +1,5 @@
 import { Command } from "@colyseus/command";
 import { BattleRoom } from "@/rooms/battle/battle.room.js";
-import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
 import {
     BattleEventEnum,
     BattlePhaseEnum,
@@ -11,6 +10,7 @@ import { battleItemEffectService } from "@/rooms/battle/services/battle-item-eff
 import { BattleLogDetail, PlayerTurnLog } from "@/modules/battle-log/models/battle-log.model.js";
 import { timerService } from "@/shares/services/timer.service.js";
 import { battleService } from "@/rooms/battle/services/battle.service.js";
+import { battleBotService } from "@/rooms/battle/services/battle-bot.service.js";
 
 export class PhaseExecutingBattleCommand extends Command<BattleRoom> {
     async execute() {
@@ -35,7 +35,7 @@ export class PhaseExecutingBattleCommand extends Command<BattleRoom> {
             this.room.logs.push(turn0Log);
         }
 
-        for (let turn = 1; turn < BattleConstants.TURNS_PER_WAVE + 1; turn++) {
+        for (let turn = 1; turn < this.room.config.turnsPerWave + 1; turn++) {
             const wave = this.state.wave;
             const logTurnBefore = this.room.logs[this.room.logs.length - 1];
 
@@ -111,19 +111,20 @@ export class PhaseExecutingBattleCommand extends Command<BattleRoom> {
         }
         this.room.broadcast(BattleEventEnum.BATTLE_LOG, waveLog);
 
-        if (this.state.wave >= BattleConstants.MAX_WAVE) {
+        if (this.state.wave >= this.room.config.maxWave) {
             this.room.result = battleCalcService.getBattleResult(
                 this.room.logs[this.room.logs.length - 1].players,
                 wave,
-                BattleConstants.MAX_WAVE
+                this.room.config.maxWave
             );
         }
+        battleBotService.submitExecuteDone(this.room);
 
         timerService.setTimer(
             this.room.timers,
             this.room.clock,
             BattleTimerEnum.EXECUTING_DONE_TIMER,
-            BattleConstants.EXECUTING_DONE_TIMEOUT_MS,
+            this.room.config.executingDoneTimeoutMs,
             () => {
                 this.room.dispatcher.dispatch(
                     battleService.nextOrEndPhaseCommand(

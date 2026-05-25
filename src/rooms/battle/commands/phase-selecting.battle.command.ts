@@ -1,8 +1,8 @@
 import { Command } from "@colyseus/command";
 import { BattlePhaseEnum, BattleTimerEnum } from "@/rooms/battle/enums/battle.enum.js";
 import { PhaseExecutingBattleCommand } from "@/rooms/battle/commands/phase-executing.battle.command.js";
-import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
 import { battleService } from "@/rooms/battle/services/battle.service.js";
+import { battleBotService } from "@/rooms/battle/services/battle-bot.service.js";
 import { timerService } from "@/shares/services/timer.service.js";
 import { BattleRoom } from "@/rooms/battle/battle.room.js";
 export class PhaseSelectingBattleCommand extends Command<BattleRoom> {
@@ -17,24 +17,21 @@ export class PhaseSelectingBattleCommand extends Command<BattleRoom> {
             p.actions.clear();
         });
 
+        battleBotService.submitActions(this.room);
+
         timerService.startCountdownTicker(
             this.room.timers,
             this.clock,
             BattleTimerEnum.SELECTION_TICKER,
-            BattleConstants.SELECTION_TIME_MS,
+            this.room.config.selectionTimeMs,
             this.state
         );
-
-        if (this.room.botPlayerId) {
-            battleService.assignBotItem(this.room, this.room.botPlayerId, this.state.wave);
-            battleService.assignRandomAction(this.room, this.room.botPlayerId, this.state.wave);
-        }
 
         timerService.setTimer(
             this.room.timers,
             this.clock,
             BattleTimerEnum.SELECTION_TIMER,
-            BattleConstants.SELECTION_TIME_OUT_MS,
+            this.room.config.selectionTimeOutMs,
             () => {
                 timerService.clearTimer(this.room.timers, BattleTimerEnum.SELECTION_TICKER);
                 for (const [pId] of this.state.players) {

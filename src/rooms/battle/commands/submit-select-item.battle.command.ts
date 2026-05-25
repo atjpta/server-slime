@@ -4,22 +4,19 @@ import { BattlePhaseEnum, BattleTimerEnum } from "@/rooms/battle/enums/battle.en
 import { ClientRoomPlayer } from "@/rooms/base/types/client-room-player.type.js";
 import { PhaseSelectingBattleCommand } from "@/rooms/battle/commands/phase-selecting.battle.command.js";
 import { battleService } from "@/rooms/battle/services/battle.service.js";
-import { BattleConstants } from "@/rooms/battle/constants/battle.constants.js";
-
 interface Payload {
-    client: ClientRoomPlayer;
-    itemIndex: number;
+    playerId: string;
+    itemIndex?: number;
     swapIndex?: number;
 }
 
 export class SubmitSelectItemBattleCommand extends Command<BattleRoom, Payload> {
-    validate({ client, itemIndex, swapIndex }: Payload) {
-        const playerId = client.auth.playerId.toString();
+    validate({ playerId, itemIndex, swapIndex }: Payload) {
         if (!battleService.canSubmit(this.room, playerId, BattlePhaseEnum.SELECTING_ITEM)) {
             return false;
         }
 
-        if (!itemIndex) {
+        if (itemIndex === undefined) {
             return true;
         }
         if (!this.state.items[itemIndex]) {
@@ -27,18 +24,17 @@ export class SubmitSelectItemBattleCommand extends Command<BattleRoom, Payload> 
         }
 
         const player = this.state.players.get(playerId)!;
-        if (swapIndex && player.items.length >= BattleConstants.MAX_ITEM_SLOTS) {
+        if (swapIndex !== undefined && player.items.length >= this.room.config.maxItemSlots) {
             return swapIndex >= 0 && swapIndex < player.items.length;
         }
         return true;
     }
 
-    execute({ client, itemIndex, swapIndex }: Payload) {
-        const playerId = client.auth.playerId.toString();
+    execute({ playerId, itemIndex, swapIndex }: Payload) {
         const player = this.state.players.get(playerId)!;
-        if (itemIndex) {
+        if (itemIndex !== undefined) {
             const picked = this.state.items[itemIndex].clone();
-            if (player.items.length < BattleConstants.MAX_ITEM_SLOTS) {
+            if (player.items.length < this.room.config.maxItemSlots) {
                 player.items.push(picked);
             } else if (swapIndex !== undefined) {
                 player.items.splice(swapIndex, 1, picked);
