@@ -6,6 +6,7 @@ export class BattlePlayerState extends Schema {
     @type("string") playerId: string = "";
     @type("boolean") ready: boolean = false;
     @type(["number"]) actions = new ArraySchema<number>();
+    @type([BattleItemState]) offeredItems = new ArraySchema<BattleItemState>();
     @type([BattleItemState]) items = new ArraySchema<BattleItemState>();
 
     static from(player: Player): BattlePlayerState {

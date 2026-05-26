@@ -22,6 +22,7 @@ export interface BattleItem extends Document {
     type: BattleItemType;
     status: BattleItemStatus;
     rule: BattleItemRule;
+    weight: number;
     note: string;
     createdAt: Date;
     updatedAt: Date;
@@ -37,6 +38,7 @@ const BattleItemSchema = new Schema<BattleItem>(
             default: BattleItemStatus.ACTIVE,
         },
         rule: { type: Schema.Types.Mixed, default: {} },
+        weight: { type: Number, required: true, default: 1 },
         note: { type: String },
     },
     { timestamps: true }

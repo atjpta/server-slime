@@ -11,12 +11,18 @@ import { battleBotService } from "@/rooms/battle/services/battle-bot.service.js"
 export class PhaseSelectingItemBattleCommand extends Command<BattleRoom> {
     async execute() {
         this.state.phase = BattlePhaseEnum.SELECTING_ITEM;
-        this.state.items.clear();
         this.state.players.forEach((p) => (p.ready = false));
 
-        const seed = `items-offer-${this.room.roomId}-${this.state.wave}`;
-        const items = await battleItemService.getRandomItems(3, seed);
-        this.state.items.push(...BattleItemState.fromArray(items));
+        await Promise.all(
+            [...this.state.players.entries()].map(async ([pId, player]) => {
+                const items = await battleItemService.getRandomItems(3);
+                player.offeredItems.clear();
+                player.offeredItems.push(...BattleItemState.fromArray(items));
+                this.room.waveItemLogs.set(pId, {
+                    offeredItems: items.map((i) => ({ code: i.code, type: i.type, rule: i.rule })),
+                });
+            })
+        );
 
         battleBotService.submitSelectItem(this.room);
         timerService.startCountdownTicker(

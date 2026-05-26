@@ -8,6 +8,7 @@ import { PhaseEndedBattleCommand } from "@/rooms/battle/commands/phase-ended.bat
 import { PhaseSelectingItemBattleCommand } from "@/rooms/battle/commands/phase-selecting-item.battle.command.js";
 import { BattlePhaseEnum, BattleTimerEnum } from "@/rooms/battle/enums/battle.enum.js";
 import { timerService } from "@/shares/services/timer.service.js";
+import { PhaseSelectingBattleCommand } from "@/rooms/battle/commands/phase-selecting.battle.command.js";
 
 export class BattleService {
     getActionRandom(room: BattleRoom, skills: Skill[], seed: string): number[] {
@@ -33,10 +34,12 @@ export class BattleService {
 
     assignRandomItem(room: BattleRoom, playerId: string) {
         const player = room.state.players.get(playerId)!;
-        const availableItems = room.state.items;
-        if (player.items.length !== room.config.maxItemSlots && availableItems.length) {
+        const offeredItems = player.offeredItems;
+        if (player.items.length !== room.config.maxItemSlots && offeredItems.length) {
             const rng = seedrandom(`items-${room.roomId}-${playerId}-${room.state.wave}`);
-            const picked = availableItems[Math.floor(rng() * availableItems.length)];
+            const picked = offeredItems[Math.floor(rng() * offeredItems.length)];
+            const log = room.waveItemLogs.get(playerId);
+            if (log) log.pickedItem = { code: picked.code, type: picked.type, rule: { phase: picked.rule.phase, scale: { hp: picked.rule.scale.hp, damage: picked.rule.scale.damage } } };
             player.items.push(picked.clone());
         }
         player.ready = true;
@@ -60,8 +63,8 @@ export class BattleService {
     }
 
     nextSelectingCommand(wave: number): Command {
-        return new PhaseSelectingItemBattleCommand();
-        // return wave % 2 ? new PhaseSelectingItemBattleCommand() : new PhaseSelectingBattleCommand();
+        // return new PhaseSelectingItemBattleCommand();
+        return wave % 2 ? new PhaseSelectingItemBattleCommand() : new PhaseSelectingBattleCommand();
     }
 
     nextOrEndPhaseCommand(room: BattleRoom, next: Command): Command {

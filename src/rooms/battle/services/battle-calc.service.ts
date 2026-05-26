@@ -17,12 +17,17 @@ export class BattleCalcService {
         }, 0);
     }
 
-    calculateDamageParry(skill: Skill, dmgEnemy: number): number {
-        return dmgEnemy * (skill.scale.attackEnemy ?? 0);
+    calculateDamageParry(
+        skill: Skill,
+        dmgEnemy: number,
+        attackerBuff = 1,
+        defenderBuff = 1
+    ): number {
+        return dmgEnemy * attackerBuff * defenderBuff * (skill.scale.attackEnemy ?? 0);
     }
 
-    calculateDamageReceive(stats: PlayerStats, dmg: number) {
-        return Math.max(dmg - stats.defense, 0);
+    calculateDamageReceive(stats: PlayerStats, dmg: number, damageBuff = 1) {
+        return Math.max(dmg * damageBuff - stats.defense, 0);
     }
 
     updateStats(
@@ -32,8 +37,8 @@ export class BattleCalcService {
         const skillP1 = p1.skill;
         const skillP2 = p2.skill;
 
-        const dmgP1 = this.calculateDamage(p1) * (p1.damageBuff ?? 1);
-        const dmgP2 = this.calculateDamage(p2) * (p2.damageBuff ?? 1);
+        const dmgP1 = this.calculateDamage(p1);
+        const dmgP2 = this.calculateDamage(p2);
 
         const statsP1 = p1.stats;
         const statsP2 = p2.stats;
@@ -45,57 +50,61 @@ export class BattleCalcService {
             effects: EffectBattle[],
             stats: PlayerStats,
             typeEffect: EffectBattleEnum,
-            dmg: number
+            dmg: number,
+            damageBuff?: number
         ) => {
-            const received = this.calculateDamageReceive(stats, dmg);
+            const received = this.calculateDamageReceive(stats, dmg, damageBuff);
             stats.hp -= received;
             effects.push({ typeEffect, value: received });
         };
 
         const key = this.genKeyMapCounter([skillP1.type, skillP2.type]);
 
+        const b1 = p1.damageBuff;
+        const b2 = p2.damageBuff;
+
         switch (key) {
             case this.genKeyMapCounter([SkillType.ATTACK, SkillType.ATTACK]):
-                applyDmg(p1Effects, statsP1, EffectBattleEnum.ATTACK, dmgP2);
-                applyDmg(p2Effects, statsP2, EffectBattleEnum.ATTACK, dmgP1);
+                applyDmg(p1Effects, statsP1, EffectBattleEnum.ATTACK, dmgP2, b2);
+                applyDmg(p2Effects, statsP2, EffectBattleEnum.ATTACK, dmgP1, b1);
                 break;
             case this.genKeyMapCounter([SkillType.ATTACK, SkillType.DEFENSE]):
                 applyDmg(
                     p1Effects,
                     statsP1,
                     EffectBattleEnum.PARRY,
-                    this.calculateDamageParry(skillP2, dmgP1)
+                    this.calculateDamageParry(skillP2, dmgP1, b1, b2)
                 );
                 break;
             case this.genKeyMapCounter([SkillType.ATTACK, SkillType.SPELL]):
-                applyDmg(p2Effects, statsP2, EffectBattleEnum.ATTACK, dmgP1);
+                applyDmg(p2Effects, statsP2, EffectBattleEnum.ATTACK, dmgP1, b1);
                 break;
             case this.genKeyMapCounter([SkillType.DEFENSE, SkillType.ATTACK]):
                 applyDmg(
                     p2Effects,
                     statsP2,
                     EffectBattleEnum.PARRY,
-                    this.calculateDamageParry(skillP1, dmgP2)
+                    this.calculateDamageParry(skillP1, dmgP2, b2, b1)
                 );
                 break;
             case this.genKeyMapCounter([SkillType.DEFENSE, SkillType.DEFENSE]):
-                applyDmg(p1Effects, statsP1, EffectBattleEnum.DEFENSE, dmgP2);
-                applyDmg(p2Effects, statsP2, EffectBattleEnum.DEFENSE, dmgP1);
+                applyDmg(p1Effects, statsP1, EffectBattleEnum.DEFENSE, dmgP2, b2);
+                applyDmg(p2Effects, statsP2, EffectBattleEnum.DEFENSE, dmgP1, b1);
                 break;
             case this.genKeyMapCounter([SkillType.DEFENSE, SkillType.SPELL]):
-                applyDmg(p1Effects, statsP1, EffectBattleEnum.SPELL, dmgP2);
-                applyDmg(p2Effects, statsP2, EffectBattleEnum.DEFENSE, dmgP1);
+                applyDmg(p1Effects, statsP1, EffectBattleEnum.SPELL, dmgP2, b2);
+                applyDmg(p2Effects, statsP2, EffectBattleEnum.DEFENSE, dmgP1, b1);
                 break;
             case this.genKeyMapCounter([SkillType.SPELL, SkillType.ATTACK]):
-                applyDmg(p1Effects, statsP1, EffectBattleEnum.ATTACK, dmgP2);
+                applyDmg(p1Effects, statsP1, EffectBattleEnum.ATTACK, dmgP2, b2);
                 break;
             case this.genKeyMapCounter([SkillType.SPELL, SkillType.DEFENSE]):
-                applyDmg(p1Effects, statsP1, EffectBattleEnum.DEFENSE, dmgP2);
-                applyDmg(p2Effects, statsP2, EffectBattleEnum.SPELL, dmgP1);
+                applyDmg(p1Effects, statsP1, EffectBattleEnum.DEFENSE, dmgP2, b2);
+                applyDmg(p2Effects, statsP2, EffectBattleEnum.SPELL, dmgP1, b1);
                 break;
             case this.genKeyMapCounter([SkillType.SPELL, SkillType.SPELL]):
-                applyDmg(p1Effects, statsP1, EffectBattleEnum.SPELL, dmgP2);
-                applyDmg(p2Effects, statsP2, EffectBattleEnum.SPELL, dmgP1);
+                applyDmg(p1Effects, statsP1, EffectBattleEnum.SPELL, dmgP2, b2);
+                applyDmg(p2Effects, statsP2, EffectBattleEnum.SPELL, dmgP1, b1);
                 break;
         }
 

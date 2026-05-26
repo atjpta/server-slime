@@ -9,6 +9,27 @@ export class PhaseSelectingBattleCommand extends Command<BattleRoom> {
     execute() {
         this.state.phase = BattlePhaseEnum.SELECTING;
         this.state.wave += 1;
+
+        for (const [pId, player] of this.state.players) {
+            const waveLog = this.room.waveItemLogs.get(pId);
+            const logs = this.room.playerItemWaveLogs.get(pId) ?? [];
+            logs.push({
+                wave: this.state.wave,
+                offeredItems: waveLog?.offeredItems ?? [],
+                pickedItem: waveLog?.pickedItem,
+                inventoryAfter: [...player.items].map((i) => ({
+                    code: i.code,
+                    type: i.type,
+                    rule: {
+                        phase: i.rule.phase,
+                        scale: { hp: i.rule.scale.hp, damage: i.rule.scale.damage },
+                    },
+                })),
+            });
+            this.room.playerItemWaveLogs.set(pId, logs);
+        }
+        this.room.waveItemLogs.clear();
+
         this.room.actions.clear();
         this.room.selectedItems.clear();
         this.room.waveDamageBuff.clear();

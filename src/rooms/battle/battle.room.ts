@@ -9,7 +9,7 @@ import { SubmitActionsBattleCommand } from "@/rooms/battle/commands/submit-actio
 import { BattleState } from "@/rooms/battle/schema/battle.state.js";
 import { Player } from "@/modules/player/models/player.model.js";
 import { Skill } from "@/modules/skills/models/skill.model.js";
-import { BattleLogDetail } from "@/modules/battle-log/models/battle-log.model.js";
+import { BattleItemSnapshot, BattleLogDetail, PlayerItemWaveLogDetail } from "@/modules/battle-log/models/battle-log.model.js";
 import { masterDataService } from "@/modules/master-data/services/master-data.service.js";
 import { MasterDataKey } from "@/modules/master-data/enums/master-data.enum.js";
 import { BattleConfigValue } from "@/modules/master-data/models/master-data.model.js";
@@ -20,6 +20,7 @@ import type { PlayerRankProfile } from "@/modules/ranking/models/player-rank-pro
 import { timerService } from "@/shares/services/timer.service.js";
 import { SubmitExecutingDoneBattleCommand } from "@/rooms/battle/commands/submit-executing-done.battle.command.js";
 import { SubmitSelectItemBattleCommand } from "@/rooms/battle/commands/submit-select-item.battle.command.js";
+import { rankMode } from "@/modules/ranking/enums/ranking.enum.js";
 
 export class BattleRoom extends BaseRoomPlayer {
     maxClients = 2;
@@ -36,6 +37,8 @@ export class BattleRoom extends BaseRoomPlayer {
         string,
         { turnIndex: number; scale: number; itemCode: string; itemRule: BattleItemRule }
     >();
+    waveItemLogs = new Map<string, { offeredItems: BattleItemSnapshot[]; pickedItem?: BattleItemSnapshot }>();
+    playerItemWaveLogs = new Map<string, PlayerItemWaveLogDetail[]>();
     skills = new Map<string, Skill[]>();
     players = new Map<string, Player>();
     rankProfiles = new Map<string, PlayerRankProfile | null>();
@@ -86,7 +89,7 @@ export class BattleRoom extends BaseRoomPlayer {
 
         this.state.phase = BattlePhaseEnum.WAITING;
         this.withBot = options.withBot ?? false;
-        this.state.rankMode = options.rankMode ?? "";
+        this.state.rankMode = options.rankMode ?? rankMode.NORMAL;
     }
 
     async onJoin(client: ClientRoomPlayer, options: any) {

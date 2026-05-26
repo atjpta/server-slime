@@ -1,5 +1,5 @@
 import { Player, PlayerStats, PlayerStatsSchema } from "@/modules/player/models/player.model.js";
-import { BattleItemRule } from "@/modules/item/models/battle-item.model.js";
+import { BattleItemRule, BattleItemScale } from "@/modules/item/models/battle-item.model.js";
 import { ScaleValueSkillSchema, Skill } from "@/modules/skills/models/skill.model.js";
 import { SkillType } from "@/modules/skills/enums/skill.enum.js";
 import { BattleEndReasonEnum } from "@/rooms/battle/enums/battle.enum.js";
@@ -29,6 +29,7 @@ export interface PlayerTurnLog {
     damageReceive: EffectBattle[];
     stats: PlayerStats;
     itemUsed?: ItemUsedLog;
+    actionsAffected?: { before: number[]; after: number[] };
 }
 
 export interface BattleLogDetail {
@@ -37,8 +38,27 @@ export interface BattleLogDetail {
     players: Map<string, PlayerTurnLog>;
 }
 
+export interface BattleItemSnapshot {
+    code: string;
+    type: string;
+    rule: { phase: string; scale?: BattleItemScale };
+}
+
+export interface PlayerItemWaveLogDetail {
+    wave: number;
+    offeredItems: BattleItemSnapshot[];
+    pickedItem?: BattleItemSnapshot;
+    inventoryAfter: BattleItemSnapshot[];
+}
+
+export interface PlayerItemWaveLog {
+    player: Player;
+    logs: PlayerItemWaveLogDetail[];
+}
+
 export interface BattleLog extends Document {
     players: BattlePlayerLog[];
+    itemWaveLogs: PlayerItemWaveLog[];
     logs: BattleLogDetail[];
     winner: Player | null;
     endReason: BattleEndReasonEnum;
@@ -63,12 +83,15 @@ const ItemUsedLogSchema = new Schema<ItemUsedLog>(
     { _id: false }
 );
 
+const ActionsAffectedSchema = new Schema({ before: [Number], after: [Number] }, { _id: false });
+
 const PlayerTurnLogSchema = new Schema<PlayerTurnLog>(
     {
         action: { type: Number, required: true },
         damageReceive: [EffectBattleSchema],
         stats: { type: PlayerStatsSchema, required: true },
         itemUsed: { type: ItemUsedLogSchema },
+        actionsAffected: { type: ActionsAffectedSchema },
     },
     { _id: false }
 );
@@ -101,9 +124,28 @@ const BattlePlayerLogSchema = new Schema<BattlePlayerLog>(
     { _id: false }
 );
 
+const PlayerItemWaveLogDetailSchema = new Schema<PlayerItemWaveLogDetail>(
+    {
+        wave: { type: Number, required: true },
+        offeredItems: [Schema.Types.Mixed],
+        pickedItem: { type: Schema.Types.Mixed },
+        inventoryAfter: [Schema.Types.Mixed],
+    },
+    { _id: false }
+);
+
+const PlayerItemWaveLogSchema = new Schema<PlayerItemWaveLog>(
+    {
+        player: { type: Schema.Types.ObjectId, ref: "Player", required: true },
+        logs: { type: [PlayerItemWaveLogDetailSchema], default: [] },
+    },
+    { _id: false }
+);
+
 const BattleLogSchema = new Schema<BattleLog>(
     {
         players: [BattlePlayerLogSchema],
+        itemWaveLogs: { type: [PlayerItemWaveLogSchema], default: [] },
         logs: [BattleLogDetailSchema],
         winner: { type: Schema.Types.ObjectId, ref: "Player", default: null },
         endReason: { type: String, required: true, enum: Object.values(BattleEndReasonEnum) },
@@ -112,4 +154,8 @@ const BattleLogSchema = new Schema<BattleLog>(
     { timestamps: true }
 );
 
-export const BattleLogModel = mongoose.model<BattleLog>("BattleLog", BattleLogSchema, "battle_logs");
+export const BattleLogModel = mongoose.model<BattleLog>(
+    "BattleLog",
+    BattleLogSchema,
+    "battle_logs"
+);

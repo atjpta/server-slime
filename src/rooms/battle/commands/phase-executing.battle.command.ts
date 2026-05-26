@@ -53,17 +53,11 @@ export class PhaseExecutingBattleCommand extends Command<BattleRoom> {
 
             const p1Buff = this.room.waveDamageBuff.get(p1Id);
             const p2Buff = this.room.waveDamageBuff.get(p2Id);
+            const p1BuffScale = p1Buff?.turnIndex === turn - 1 ? p1Buff.scale : undefined;
+            const p2BuffScale = p2Buff?.turnIndex === turn - 1 ? p2Buff.scale : undefined;
             const { p1Effects, p2Effects } = battleCalcService.updateStats(
-                {
-                    skill: p1Skill,
-                    stats: p1Stats,
-                    damageBuff: p1Buff?.turnIndex === turn - 1 ? p1Buff.scale : undefined,
-                },
-                {
-                    skill: p2Skill,
-                    stats: p2Stats,
-                    damageBuff: p2Buff?.turnIndex === turn - 1 ? p2Buff.scale : undefined,
-                }
+                { skill: p1Skill, stats: p1Stats, damageBuff: p1BuffScale },
+                { skill: p2Skill, stats: p2Stats, damageBuff: p2BuffScale }
             );
 
             const players = new Map<string, PlayerTurnLog>([

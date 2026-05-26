@@ -3,8 +3,8 @@ import { RankLadderStatus, RankLadderModel } from "@/modules/ranking/models/rank
 
 const rankLadders = [
     {
-        rankMode: rankMode.NORMAL,
-        name: "Rank Normal",
+        rankMode: rankMode.UNLIMIT,
+        name: "Rank Unlimit",
         ruleSet: { initialPoint: 1000, winPoint: 75, losePoint: 15 },
         status: RankLadderStatus.ACTIVE,
     },

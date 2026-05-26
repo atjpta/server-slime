@@ -1,4 +1,3 @@
-import seedrandom from "seedrandom";
 import {
     BattleItemModel,
     BattleItem,
@@ -6,14 +5,18 @@ import {
 } from "@/modules/item/models/battle-item.model.js";
 
 export class BattleItemService {
-    async getRandomItems(count: number, seed: string): Promise<BattleItem[]> {
-        const items = await BattleItemModel.find({ status: BattleItemStatus.ACTIVE }).lean();
-        if (!items.length) return [];
-        const rng = seedrandom(seed);
-        return Array.from(
-            { length: count },
-            () => items[Math.floor(rng() * items.length)]
-        ) as BattleItem[];
+    async index(): Promise<BattleItem[]> {
+        return BattleItemModel.find({ status: BattleItemStatus.ACTIVE }).lean();
+    }
+
+    async getRandomItems(count: number): Promise<BattleItem[]> {
+        return BattleItemModel.aggregate([
+            { $match: { status: BattleItemStatus.ACTIVE } },
+            { $addFields: { score: { $pow: [{ $rand: {} }, { $divide: [1, "$weight"] }] } } },
+            { $sort: { score: -1 } },
+            { $limit: count },
+            { $unset: "score" },
+        ]);
     }
 }
 

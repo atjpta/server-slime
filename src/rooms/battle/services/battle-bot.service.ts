@@ -53,11 +53,11 @@ export class BattleBotService {
         if (!botId) return;
 
         const player = room.state.players.get(botId)!;
-        const availableItems = room.state.items;
+        const offeredItems = player.offeredItems;
         let itemIndex: number | undefined;
-        if (player.items.length < room.config.maxItemSlots && availableItems.length) {
+        if (player.items.length < room.config.maxItemSlots && offeredItems.length) {
             const rng = seedrandom(`items-${room.roomId}-${botId}-${room.state.wave}`);
-            itemIndex = Math.floor(rng() * availableItems.length);
+            itemIndex = Math.floor(rng() * offeredItems.length);
         }
 
         room.dispatcher.dispatch(new SubmitSelectItemBattleCommand(), {

@@ -3,6 +3,7 @@ import { BattleLogModel, BattleLogDetail } from "@/modules/battle-log/models/bat
 import { BattleLogFilter } from "@/modules/battle-log/validators/battle-log.validator.js";
 import { BattleRoom } from "@/rooms/battle/battle.room.js";
 import { Types } from "mongoose";
+import { rankMode } from "@/modules/ranking/enums/ranking.enum.js";
 
 export class BattleLogService {
     async createByBattleRoom(room: BattleRoom, winner: string, endReason: BattleEndReasonEnum) {
@@ -12,20 +13,24 @@ export class BattleLogService {
             skills: room.skills.get(p._id.toString()),
         }));
 
-        const logs: BattleLogDetail[] = room.logs.map((log) => {
-            return {
-                wave: log.wave,
-                turn: log.turn,
-                players: new Map(log.players),
-            };
-        });
+        const itemWaveLogs = [...room.players.keys()].map((pId) => ({
+            player: new Types.ObjectId(pId),
+            logs: room.playerItemWaveLogs.get(pId) ?? [],
+        }));
+
+        const logs: BattleLogDetail[] = room.logs.map((log) => ({
+            wave: log.wave,
+            turn: log.turn,
+            players: new Map(log.players),
+        }));
 
         await BattleLogModel.create({
             players,
+            itemWaveLogs,
             logs,
             winner: winner ? new Types.ObjectId(winner) : null,
             endReason,
-            rankMode: room.state.rankMode || undefined,
+            rankMode: room.state.rankMode || rankMode.NORMAL,
         });
     }
 
