@@ -6,6 +6,9 @@ import { RankLadderSeed } from "@/modules/ranking/seeds/rank-ladder.seed.js";
 import { RankTierConfigSeed } from "@/modules/ranking/seeds/rank-tier-config.seed.js";
 import { BattleItemSeed } from "@/modules/item/seeds/battle-item.seed.js";
 import { MasterDataSeed } from "@/modules/master-data/seeds/master-data.seed.js";
+import { ItemSeed } from "@/modules/item/seeds/item.seed.js";
+import { InventorySeed } from "@/modules/inventory/seeds/inventory.seed.js";
+import { EquipmentSeed } from "@/modules/equipment/seeds/equipment.seed.js";
 
 // import dns from "dns";
 // dns.setServers(["1.1.1.1"]);
@@ -18,5 +21,8 @@ await RunSeed([
     PlayerRankProfileSeed,
     BattleItemSeed,
     MasterDataSeed,
+    ItemSeed,
+    InventorySeed,
+    EquipmentSeed,
 ]);
 process.exit(0);

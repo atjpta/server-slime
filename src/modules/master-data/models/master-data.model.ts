@@ -16,7 +16,12 @@ export interface BattleConfigValue {
     reconnectionS: number;
 }
 
-export type MasterDataValue = BattleConfigValue;
+export interface InventoryConfigValue {
+    maxStack: number;
+    maxLength: number;
+}
+
+export type MasterDataValue = BattleConfigValue | InventoryConfigValue;
 
 export interface IMasterData extends Document {
     key: MasterDataKey;

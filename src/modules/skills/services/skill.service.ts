@@ -1,21 +1,13 @@
-import { SkillType } from "@/modules/skills/enums/skill.enum.js";
+import { SkillCode } from "@/modules/skills/enums/skill.enum.js";
 import { SkillModel } from "@/modules/skills/models/skill.model.js";
 
 export class SkillService {
     async getSkillDefault() {
         return SkillModel.find({
             code: {
-                $in: [
-                    this.genCodeSkill(SkillType.ATTACK, "001"),
-                    this.genCodeSkill(SkillType.SPELL, "001"),
-                    this.genCodeSkill(SkillType.DEFENSE, "001"),
-                ],
+                $in: [SkillCode.ATTACK_001, SkillCode.SPELL_001, SkillCode.DEFENSE_001],
             },
         }).lean();
-    }
-
-    genCodeSkill(prefix: SkillType, key: string) {
-        return `${prefix}-${key}`;
     }
 }
 

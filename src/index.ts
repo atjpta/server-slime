@@ -9,6 +9,9 @@ import { battleLogRoutes } from "@/modules/battle-log/routes/battle-log.router.j
 import { rankingRoutes } from "@/modules/ranking/routes/ranking.router.js";
 import { masterDataRoutes } from "@/modules/master-data/routes/master-data.router.js";
 import { battleItemRoutes } from "@/modules/item/routes/battle-item.router.js";
+import { itemRoutes } from "@/modules/item/routes/item.router.js";
+import { inventoryRoutes } from "@/modules/inventory/routes/inventory.router.js";
+import { equipmentRoutes } from "@/modules/equipment/routes/equipment.router.js";
 import { env } from "@/configs/env.config.js";
 // import { redisDriver } from "@/configs/redis.config.js";
 
@@ -34,6 +37,9 @@ listen(
             ...rankingRoutes,
             ...masterDataRoutes,
             ...battleItemRoutes,
+            ...itemRoutes,
+            ...inventoryRoutes,
+            ...equipmentRoutes,
         }),
         transport: new uWebSocketsTransport({}, {}),
     }),

@@ -13,6 +13,8 @@ import jwt from "jsonwebtoken";
 import { AuthRoomPlayer } from "@/modules/player/types/auth-player.type.js";
 import { skillService } from "@/modules/skills/services/skill.service.js";
 import { playerRankProfileService } from "@/modules/ranking/services/player-rank-profile.service.js";
+import { inventoryService } from "@/modules/inventory/services/inventory.service.js";
+import { equipmentService } from "@/modules/equipment/services/equipment.service.js";
 
 export class PlayerService {
     async create(userId: Types.ObjectId, name: string) {
@@ -33,7 +35,11 @@ export class PlayerService {
             statsDetail: stats.statsDetailInit,
             skills,
         });
-        await playerRankProfileService.initPlayerRankProfiles(player._id);
+        await Promise.all([
+            playerRankProfileService.initPlayerRankProfiles(player._id),
+            inventoryService.getOrCreate(player._id.toString()),
+            equipmentService.initPlayerEquipment(player._id.toString()),
+        ]);
         return player.toObject();
     }
 

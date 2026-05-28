@@ -16,7 +16,7 @@ export class MasterDataService {
     }
 
     async update(key: MasterDataKey, data: { value?: MasterDataValue; note?: string }) {
-        return MasterDataModel.findOneAndUpdate({ key }, { $set: data }, { new: true }).lean();
+        return MasterDataModel.findOneAndUpdate({ key }, { $set: data }, { returnDocument: "after" }).lean();
     }
 
     async delete(key: MasterDataKey) {

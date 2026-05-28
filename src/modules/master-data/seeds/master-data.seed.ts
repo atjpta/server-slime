@@ -20,6 +20,14 @@ const entries = [
             reconnectionS: 60,
         },
     },
+    {
+        key: MasterDataKey.INVENTORY_CONFIG,
+        note: "Cấu hình thông số túi đồ của player",
+        value: {
+            maxStack: 9999,
+            maxLength: 50,
+        },
+    },
 ];
 
 export const MasterDataSeed = async () => {

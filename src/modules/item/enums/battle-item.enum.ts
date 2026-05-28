@@ -7,9 +7,9 @@ export enum BattleItemType {
 }
 
 export enum BattleItemCode {
-    HEAL_001 = "heal_001",
-    DAMAGE_001 = "damage_001",
-    PUSH_001 = "push_001",
-    SHUFFLE_001 = "shuffle_001",
-    STORM_001 = "storm_001",
+    HEAL_001 = "heal-001",
+    DAMAGE_001 = "damage-001",
+    PUSH_001 = "push-001",
+    SHUFFLE_001 = "shuffle-001",
+    STORM_001 = "storm-001",
 }
