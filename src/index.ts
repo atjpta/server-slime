@@ -12,6 +12,8 @@ import { battleItemRoutes } from "@/modules/item/routes/battle-item.router.js";
 import { itemRoutes } from "@/modules/item/routes/item.router.js";
 import { inventoryRoutes } from "@/modules/inventory/routes/inventory.router.js";
 import { equipmentRoutes } from "@/modules/equipment/routes/equipment.router.js";
+import { walletRoutes } from "@/modules/wallet/routes/wallet.router.js";
+import { currencyTransactionRoutes } from "@/modules/wallet/routes/currency-transaction.router.js";
 import { env } from "@/configs/env.config.js";
 // import { redisDriver } from "@/configs/redis.config.js";
 
@@ -40,6 +42,8 @@ listen(
             ...itemRoutes,
             ...inventoryRoutes,
             ...equipmentRoutes,
+            ...walletRoutes,
+            ...currencyTransactionRoutes,
         }),
         transport: new uWebSocketsTransport({}, {}),
     }),

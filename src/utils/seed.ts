@@ -9,6 +9,7 @@ import { MasterDataSeed } from "@/modules/master-data/seeds/master-data.seed.js"
 import { ItemSeed } from "@/modules/item/seeds/item.seed.js";
 import { InventorySeed } from "@/modules/inventory/seeds/inventory.seed.js";
 import { EquipmentSeed } from "@/modules/equipment/seeds/equipment.seed.js";
+import { WalletSeed } from "@/modules/wallet/seeds/wallet.seed.js";
 
 // import dns from "dns";
 // dns.setServers(["1.1.1.1"]);
@@ -24,5 +25,6 @@ await RunSeed([
     ItemSeed,
     InventorySeed,
     EquipmentSeed,
+    WalletSeed,
 ]);
 process.exit(0);

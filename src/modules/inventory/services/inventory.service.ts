@@ -1,6 +1,10 @@
-import { Inventory, InventoryModel } from "@/modules/inventory/models/inventory.model.js";
+import {
+    Inventory,
+    InventoryItem,
+    InventoryModel,
+} from "@/modules/inventory/models/inventory.model.js";
 import { ItemRarity, ItemSource } from "@/modules/item/enums/item.enum.js";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 export interface AddInventoryItemDto {
     item: string;
@@ -12,6 +16,19 @@ export interface AddInventoryItemDto {
 }
 
 export class InventoryService {
+    async initPlayerInventory(playerId: string): Promise<Inventory> {
+        return InventoryModel.findOneAndUpdate(
+            { player: playerId },
+            {
+                $setOnInsert: {
+                    player: new mongoose.Types.ObjectId(playerId),
+                    items: [] as InventoryItem[],
+                },
+            },
+            { returnDocument: "after", upsert: true }
+        ) as Promise<Inventory>;
+    }
+
     async getByPlayerId(playerId: string): Promise<Inventory | null> {
         return InventoryModel.findOne({ player: playerId }).populate("items.item").lean();
     }

@@ -12,7 +12,7 @@ const authPlayerEndpoint = createEndpoint.create({ use: [authPlayerMiddleware] }
 const prefix = "/equipment";
 
 export const equipmentRoutes = {
-    equipmentPlayer: authPlayerEndpoint(prefix, { method: "GET" }, (ctx) =>
+    equipmentPlayer: authPlayerEndpoint(`${prefix}/me`, { method: "GET" }, (ctx) =>
         RouterContainer(ctx, async () => {
             const { playerId } = ctx.context;
             const data = await equipmentService.getByPlayerId(playerId.toString());

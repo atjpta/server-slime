@@ -11,7 +11,7 @@ const authPlayerEndpoint = createEndpoint.create({ use: [authPlayerMiddleware] }
 const prefix = "/inventory";
 
 export const inventoryRoutes = {
-    getInventory: authPlayerEndpoint(prefix, { method: "GET" }, (ctx) =>
+    getInventoryPlayer: authPlayerEndpoint(`${prefix}/me`, { method: "GET" }, (ctx) =>
         RouterContainer(ctx, async () => {
             const { playerId } = ctx.context;
             const data = await inventoryService.getByPlayerId(playerId.toString());

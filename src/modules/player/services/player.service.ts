@@ -15,6 +15,7 @@ import { skillService } from "@/modules/skills/services/skill.service.js";
 import { playerRankProfileService } from "@/modules/ranking/services/player-rank-profile.service.js";
 import { inventoryService } from "@/modules/inventory/services/inventory.service.js";
 import { equipmentService } from "@/modules/equipment/services/equipment.service.js";
+import { walletService } from "@/modules/wallet/services/wallet.service.js";
 
 export class PlayerService {
     async create(userId: Types.ObjectId, name: string) {
@@ -37,8 +38,9 @@ export class PlayerService {
         });
         await Promise.all([
             playerRankProfileService.initPlayerRankProfiles(player._id),
-            inventoryService.getOrCreate(player._id.toString()),
+            inventoryService.initPlayerInventory(player._id.toString()),
             equipmentService.initPlayerEquipment(player._id.toString()),
+            walletService.initPlayerWallets(player._id.toString()),
         ]);
         return player.toObject();
     }
